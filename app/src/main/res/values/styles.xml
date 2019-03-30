@@ -6,6 +6,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
     </style>
+    <style name="SwitchCompatTheme" parent="Theme.AppCompat.Light">
+        <!--<item name="colorSwitchThumbNormal"> #4CAF50</item>-->
+        <item name="android:colorControlNormal">@color/colorCheck</item>
+        <!--<item name="android:trackTint">@color/colorCheck</item>-->
+        <item name="android:colorControlActivated">@color/colorPost</item>
+    </style>
+    
+    
+
 
 </resources>

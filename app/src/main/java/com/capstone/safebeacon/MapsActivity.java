@@ -1,15 +1,29 @@
 package com.capstone.safebeacon;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,8 +43,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private static final String TAG = "Testing";
 
+    LocationManager locationManager;
+
+    LocationListener locationListener;
+
     //widgets
     private EditText searchText;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                }
+            }
+        }
+    }
+
 
 //    public void goBack(View view) {
 //        Intent intent = new Intent(getApplicationContext(),WelcomeActivity.class);
@@ -43,7 +75,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        searchText = (EditText)findViewById(R.id.input_search);
+        searchText = findViewById(R.id.input_search);
+        Switch switchView = findViewById(R.id.switchView);
+        final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
+        final RelativeLayout reLay1 = findViewById(R.id.relativeLayout1);
+        final ImageButton photoButton = findViewById(R.id.photoButton);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -52,15 +89,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         init();
 
+        switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                                  @Override
+                                                  public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                                                      if (b) {
+                                                          reLay2.setVisibility(View.INVISIBLE);
+                                                          photoButton.setVisibility(View.VISIBLE);
+                                                      } else {
+                                                          reLay2.setVisibility(View.VISIBLE);
+                                                          photoButton.setVisibility(View.INVISIBLE);
+                                                      }
+                                                  }
+                                              }
+        );
+
     }
 
+
     private void init() {
-        Log.d(TAG,"init: initializing");
+        Log.d(TAG, "init: initializing");
 
         searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEARCH
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || event.getAction() == KeyEvent.ACTION_DOWN
                         || event.getAction() == KeyEvent.KEYCODE_ENTER) {
@@ -80,15 +132,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String searchString = searchText.getText().toString();
 
         Geocoder geocoder = new Geocoder(MapsActivity.this);
-        List<Address> addressList  = new ArrayList<>();
+        List<Address> addressList = new ArrayList<>();
 
         try {
-            addressList = geocoder.getFromLocationName(searchString,1);
-        }catch (IOException e) {
+            addressList = geocoder.getFromLocationName(searchString, 1);
+        } catch (IOException e) {
             Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
         }
 
-        if(addressList.size() > 0) {
+        if (addressList.size() > 0) {
             Address address = addressList.get(0);
 
             Log.d(TAG, "geoLocate: found a location: " + address.toString());
@@ -118,29 +170,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         BitmapDescriptor minorAccident = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
         BitmapDescriptor severeAccident = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
 
-
         ArrayList<LatLng> latLngs = new ArrayList<>();
 
-        latLngs.add(new LatLng(33.556242,-101.801492));
-        latLngs.add(new LatLng(33.541580,-101.900734));
-        latLngs.add(new LatLng(33.573734,-101.926059));
-        latLngs.add(new LatLng(33.605888,-101.870524));
-        latLngs.add(new LatLng(33.591225,-101.814989));
-        latLngs.add(new LatLng(33.533765,-101.840314));
-        latLngs.add(new LatLng(33.608716,-101.939556));
-        latLngs.add(new LatLng(33.551256,-101.884021));
-        latLngs.add(new LatLng(33.583410,-101.909346));
-        latLngs.add(new LatLng(33.568747,-101.853811));
-        latLngs.add(new LatLng(33.600901,-101.879136));
-        latLngs.add(new LatLng(33.543441,-101.823601));
-        latLngs.add(new LatLng(33.528779,-101.922843));
-        latLngs.add(new LatLng(33.560933,-101.793391));
-        latLngs.add(new LatLng(33.546270,-101.892633));
-        latLngs.add(new LatLng(33.578424,-101.837099));
-        latLngs.add(new LatLng(33.610578,-101.862423));
-        latLngs.add(new LatLng(33.595915,-101.806888));
-        latLngs.add(new LatLng(33.538455,-101.832213));
-        latLngs.add(new LatLng(33.570609,-101.931455));
+
+        latLngs.add(new LatLng(33.556242, -101.801492));
+        latLngs.add(new LatLng(33.541580, -101.900734));
+        latLngs.add(new LatLng(33.573734, -101.926059));
+        latLngs.add(new LatLng(33.605888, -101.870524));
+        latLngs.add(new LatLng(33.591225, -101.814989));
+        latLngs.add(new LatLng(33.533765, -101.840314));
+        latLngs.add(new LatLng(33.608716, -101.939556));
+        latLngs.add(new LatLng(33.551256, -101.884021));
+        latLngs.add(new LatLng(33.583410, -101.909346));
+        latLngs.add(new LatLng(33.568747, -101.853811));
+        latLngs.add(new LatLng(33.600901, -101.879136));
+        latLngs.add(new LatLng(33.543441, -101.823601));
+        latLngs.add(new LatLng(33.528779, -101.922843));
+        latLngs.add(new LatLng(33.560933, -101.793391));
+        latLngs.add(new LatLng(33.546270, -101.892633));
+        latLngs.add(new LatLng(33.578424, -101.837099));
+        latLngs.add(new LatLng(33.610578, -101.862423));
+        latLngs.add(new LatLng(33.595915, -101.806888));
+        latLngs.add(new LatLng(33.538455, -101.832213));
+        latLngs.add(new LatLng(33.570609, -101.931455));
 
         // Add a marker in Sydney and move the camera
 //        LatLng liberty = new LatLng(location.getLatitude(), location.getLongitude());
@@ -148,31 +200,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        mMap.addMarker(new MarkerOptions().position(liberty).title(name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(liberty,10));
         for (int i = 0; i < latLngs.size(); i++) {
-            if(i % 6 == 1) {
+            if (i % 6 == 1) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(theft));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
-            }
-            else if(i % 6 == 2) {
+            } else if (i % 6 == 2) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(fighting));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
-            }
-            else if(i % 6 == 3) {
+            } else if (i % 6 == 3) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(burglar));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
-            }
-            else if(i % 6 == 4) {
+            } else if (i % 6 == 4) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(crime));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
-            }
-            else if(i % 6 == 5) {
+            } else if (i % 6 == 5) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(minorAccident));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
-            }
-            else {
+            } else {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(severeAccident));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             }
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngs.get(11),11));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngs.get(11), 11));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+
     }
+
+
 }
