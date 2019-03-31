@@ -4,13 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -36,10 +34,13 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -49,6 +50,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
 
     LocationListener locationListener;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //widgets
     private EditText searchText;
@@ -104,7 +107,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
 
     }
-
 
 //    public void goBack(View view) {
 //        Intent intent = new Intent(getApplicationContext(),WelcomeActivity.class);
@@ -314,8 +316,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(severeAccident));
             }
         }
-
-
 
 
 //        mMap2.setMyLocationEnabled(true);
