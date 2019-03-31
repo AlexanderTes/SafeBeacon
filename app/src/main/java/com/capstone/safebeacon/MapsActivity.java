@@ -1,10 +1,13 @@
 package com.capstone.safebeacon;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
@@ -50,6 +53,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //widgets
     private EditText searchText;
 
+    private Switch switchView;
+    BitmapDescriptor myLocationIC;
+
+    private static final int CAMERA_REQUEST = 1888;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+
+
+    public void updateMap(Location location) {
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+        mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,14));
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -58,9 +75,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+                    Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    updateMap(lastLocation);
                 }
             }
         }
+        if (requestCode == MY_CAMERA_PERMISSION_CODE)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+            else
+            {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
+//        protected void onActivityResult(int requestCode, int resultCode, Intent data)
+//        {
+//            if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
+//            {
+//                Bitmap photo = (Bitmap) data.getExtras().get("data");
+//                imageView.setImageBitmap(photo);
+//            }
+//        }
+
     }
 
 
@@ -76,9 +118,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         searchText = findViewById(R.id.input_search);
-        Switch switchView = findViewById(R.id.switchView);
+        switchView = findViewById(R.id.switchView);
         final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
-        final RelativeLayout reLay1 = findViewById(R.id.relativeLayout1);
         final ImageButton photoButton = findViewById(R.id.photoButton);
 
 
@@ -90,21 +131,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         init();
 
         switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                                                  @Override
-                                                  public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                                                      if (b) {
-                                                          reLay2.setVisibility(View.INVISIBLE);
-                                                          photoButton.setVisibility(View.VISIBLE);
-                                                      } else {
-                                                          reLay2.setVisibility(View.VISIBLE);
-                                                          photoButton.setVisibility(View.INVISIBLE);
-                                                      }
-                                                  }
-                                              }
-        );
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    reLay2.setVisibility(View.INVISIBLE);
+                    photoButton.setVisibility(View.VISIBLE);
+                } else {
+                    reLay2.setVisibility(View.VISIBLE);
+                    photoButton.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        photoButton.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+                }
+                else
+                {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }
+            }
+        });
 
     }
-
 
     private void init() {
         Log.d(TAG, "init: initializing");
@@ -142,8 +197,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (addressList.size() > 0) {
             Address address = addressList.get(0);
+            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
 
-            Log.d(TAG, "geoLocate: found a location: " + address.toString());
+
+            mMap.addMarker(new MarkerOptions().position(latLng));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
 //            Toast.makeText(this, address.toString(),Toast.LENGTH_SHORT).show();
         }
     }
@@ -169,8 +227,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         BitmapDescriptor crime = BitmapDescriptorFactory.fromResource(R.drawable.crime);
         BitmapDescriptor minorAccident = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
         BitmapDescriptor severeAccident = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
+        myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
 
         ArrayList<LatLng> latLngs = new ArrayList<>();
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                if(switchView.isChecked())
+                    updateMap(location);
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+        }
+        else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(lastLocation != null) {
+                updateMap(lastLocation);
+            }
+        }
 
 
         latLngs.add(new LatLng(33.556242, -101.801492));
@@ -194,45 +298,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         latLngs.add(new LatLng(33.538455, -101.832213));
         latLngs.add(new LatLng(33.570609, -101.931455));
 
-        // Add a marker in Sydney and move the camera
-//        LatLng liberty = new LatLng(location.getLatitude(), location.getLongitude());
-//        String name = "Texas Tech University";
-//        mMap.addMarker(new MarkerOptions().position(liberty).title(name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(liberty,10));
+
         for (int i = 0; i < latLngs.size(); i++) {
             if (i % 6 == 1) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(theft));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             } else if (i % 6 == 2) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(fighting));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             } else if (i % 6 == 3) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(burglar));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             } else if (i % 6 == 4) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(crime));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             } else if (i % 6 == 5) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(minorAccident));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             } else {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(severeAccident));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngs.get(i)));
             }
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngs.get(11), 11));
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
+
+
+
+//        mMap2.setMyLocationEnabled(true);
 
     }
 
