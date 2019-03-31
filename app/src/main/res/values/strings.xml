@@ -2,11 +2,11 @@
     <string name="app_name">Safebeacon</string>
 
     <string-array name="accidentTypes">
-        <item>1 - burglar</item>
-        <item>2 - crime</item>
-        <item>3 - fighting</item>
-        <item>4 - minor_accident</item>
-        <item>5 - severe_accident</item>
-        <item>6 - theft</item>
+        <item>1-burglar</item>
+        <item>2-crime</item>
+        <item>3-fighting</item>
+        <item>4-minor_accident</item>
+        <item>5-severe_accident</item>
+        <item>6-theft</item>
     </string-array>
 </resources>

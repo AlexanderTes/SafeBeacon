@@ -9,9 +9,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import java.util.Calendar;
 //import com.google.firebase.database.DatabaseReference;
 //import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinner = findViewById(R.id.spinner);
         comment = findViewById(R.id.comment);
         final Report report = new Report();
+        final User user = new User();
+        final Accident accident = new Accident();
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.accidentTypes,android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -40,17 +44,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //report.setLocation();
+                report.getTimeStamp();
+                report.setComment(comment.getText().toString());
+                String id = user.generateUserId();
+                String[] arr = accidentType.split("-");
+                accident.setType(Integer.parseInt(arr[0]));
+                accident.setName(arr[1]);
+                report.setUser(user);
+                report.setAccident(accident);
             }
         });
     }
-
-
-
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         accidentType = parent.getItemAtPosition(position).toString();
-
+        //Toast.makeText(this, accidentType, Toast.LENGTH_SHORT).show();
     }
 
     @Override

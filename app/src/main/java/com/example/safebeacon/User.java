@@ -10,6 +10,12 @@ public class User implements userInterface, reportInterface {
     private String name;
     private String phone;
 
+    User() {
+        userId = "";
+        name = "";
+        phone = "";
+    }
+
     protected void setName(String str) {
         this.name = str;
     }

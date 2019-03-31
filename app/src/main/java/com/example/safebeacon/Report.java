@@ -1,12 +1,15 @@
 package com.example.safebeacon;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class Report extends Location implements reportInterface {
     private User user;
     private Accident accident;
     private Location location;
     private String reportId;
     private String comment;
-    private String timeStamp;
+    //private Date timeStamp;
 
     Report() {
         this.user = null;
@@ -15,12 +18,8 @@ public class Report extends Location implements reportInterface {
         this.reportId = "";
     }
 
-    public String getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
+    public Date getTimeStamp() {
+        return Calendar.getInstance().getTime();
     }
 
     public void setComment(String comment) {
