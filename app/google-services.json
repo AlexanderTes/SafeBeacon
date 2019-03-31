@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "822490087346",
+    "firebase_url": "https://safebeacon-2019.firebaseio.com",
+    "project_id": "safebeacon-2019",
+    "storage_bucket": "safebeacon-2019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822490087346:android:e5feeac2db1a5682",
+        "android_client_info": {
+          "package_name": "com.example.safebeacon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "822490087346-lk0vj9s95b5s9qu5k4pi35t3rjsk9146.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxqpwR2RchtktUpfkRKXdJvhGFl6m2k1o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
