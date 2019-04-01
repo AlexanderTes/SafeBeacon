@@ -50,16 +50,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LocationListener locationListener;
 
-
-
     //widgets
     private EditText searchText;
 
     private Switch switchView;
     BitmapDescriptor myLocationIC;
 
-    private static final int CAMERA_REQUEST = 1888;
-    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+//    private static final int CAMERA_REQUEST = 1888;
+//    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
 
     public void updateMap(Location location) {
@@ -83,19 +81,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }
-        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-        {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            }
-            else
-            {
-                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-            }
-        }
+//        if (requestCode == MY_CAMERA_PERMISSION_CODE)
+//        {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+//            {
+//                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+//                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+//            }
+//            else
+//            {
+//                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+//            }
+//        }
 //        protected void onActivityResult(int requestCode, int resultCode, Intent data)
 //        {
 //            if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
@@ -120,9 +118,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         searchText = findViewById(R.id.input_search);
         switchView = findViewById(R.id.switchView);
+
         final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
         final ImageButton photoButton = findViewById(R.id.photoButton);
 
+        switchView.setChecked(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -148,15 +148,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onClick(View view) {
-                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-                {
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-                }
-                else
-                {
-                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                }
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+
+                startActivity(intent);
+//                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+//                {
+//                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+//                }
+//                else
+//                {
+//                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+//                }
             }
         });
 

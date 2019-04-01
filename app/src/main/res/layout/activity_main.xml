@@ -27,6 +27,7 @@
                 android:ems="10"
                 android:text="UserID: "
                 android:textAlignment="center"
+                android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
             <TextView
@@ -36,8 +37,8 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:text="sample here"
                 android:textAlignment="textStart"
+                android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -56,6 +57,7 @@
                 android:ems="10"
                 android:text="Location: "
                 android:textAlignment="center"
+                android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
             <TextView
@@ -64,8 +66,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ems="10"
-                android:text="location here"
                 android:textAlignment="textStart"
+                android:textColor="@android:color/black"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -75,6 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="60dp"
             android:text="Accident Report"
+            android:textColor="@color/cast_expanded_controller_background_color"
             android:textSize="36sp" />
 
         <LinearLayout

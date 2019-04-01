@@ -3,11 +3,11 @@
     <string name="title_activity_maps">Safe Beacon</string>
 
     <string-array name="accidentTypes">
-        <item>1-burglar</item>
-        <item>2-crime</item>
-        <item>3-fighting</item>
-        <item>4-minor_accident</item>
-        <item>5-severe_accident</item>
-        <item>6-theft</item>
+        <item>1- Burglar</item>
+        <item>2- Crime</item>
+        <item>3- Fighting</item>
+        <item>4- Minor_accident</item>
+        <item>5- Severe_accident</item>
+        <item>6- Theft</item>
     </string-array>
 </resources>
