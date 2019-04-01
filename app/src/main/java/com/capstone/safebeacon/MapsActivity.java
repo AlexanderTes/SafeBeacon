@@ -34,13 +34,17 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -53,7 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationListener locationListener;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference noteRef = db.document("reports/1F1W5YT1NT13GHHHYGB5");
+    private DocumentReference noteRef = db.document("reports/R52EIP13NI3HZQE7QGPN");
 
     //widgets
     private EditText searchText;
@@ -110,6 +114,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public void loadNote() {
+        noteRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                        if(documentSnapshot.exists()) {
+//                            String comment = documentSnapshot.getString("comment");
+//                            String locationSTr = documentSnapshot.getString("location");
+
+//                            Log.d(TAG, "Location: " + locationSTr);
+
+                            Map<String, Object> note = documentSnapshot.getData();
+                            Log.d(TAG,"Load Note: " + note.toString());
+                        }
+                        else
+                            Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +159,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        loadNote();
+
         init();
 
         switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -136,9 +169,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
+
+                    mMap.getUiSettings().setZoomControlsEnabled(false);
+
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
+
+                    mMap.getUiSettings().setZoomControlsEnabled(true);
                 }
             }
         });
@@ -222,7 +260,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.getUiSettings().setZoomControlsEnabled(true);
 
         BitmapDescriptor fighting = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
         BitmapDescriptor burglar = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
@@ -304,17 +341,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         for (int i = 0; i < latLngs.size(); i++) {
             if (i % 6 == 1) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(theft));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(theft));
             } else if (i % 6 == 2) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(fighting));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(fighting));
             } else if (i % 6 == 3) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(burglar));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglar));
             } else if (i % 6 == 4) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(crime));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(crime));
             } else if (i % 6 == 5) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(minorAccident));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(minorAccident));
             } else {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker " + i).icon(severeAccident));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(severeAccident));
             }
         }
 
