@@ -126,8 +126,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 //                            Log.d(TAG, "Location: " + locationSTr);
 
-//                            Map<String, Object> note = documentSnapshot.getData();
-//                            Log.d(TAG,"Load Note: " + note.toString());
+                            Map<String, Object> note = documentSnapshot.getData();
+                            Log.d(TAG,"Load Note: " + note.toString());
                         }
                         else
                             Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
@@ -159,7 +159,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
+        loadNote();
 
         init();
 
@@ -171,7 +171,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     photoButton.setVisibility(View.VISIBLE);
 
                     mMap.getUiSettings().setZoomControlsEnabled(false);
-                    loadNote();
 
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
