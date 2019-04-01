@@ -105,12 +105,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-//    public void goBack(View view) {
-//        Intent intent = new Intent(getApplicationContext(),WelcomeActivity.class);
-//
-//        startActivity(intent);
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,8 +1,17 @@
 package com.capstone.safebeacon;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,14 +24,19 @@ import android.widget.Spinner;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -40,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private final int REQUEST_CODE = 20;
     private ImageView imageView1;
+    private LatLng myLatLng;
 
     int accidentType;
 
@@ -67,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-        Toast.makeText(this,"Your report is submitted",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Your report is submitted", Toast.LENGTH_SHORT).show();
         // [END set_document]
 
 //        Map<String, Object> data = new HashMap<>();
@@ -168,16 +183,70 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Button submitButton = findViewById(R.id.submitButton);
         Button cancelButton = findViewById(R.id.cancelButton);
         final EditText comment = findViewById(R.id.comment);
+        final TextView locationText = findViewById(R.id.location);
         imageView1 = findViewById(R.id.imageView1);
 
         Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(photoCaptureIntent, REQUEST_CODE);
 
         //add accident Types to spinner
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.accidentTypes,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.accidentTypes, android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(this);
+
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                Geocoder geocoder = new Geocoder(MainActivity.this);
+                List<Address> addressList = new ArrayList<>();
+
+                try {
+                    addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                } catch (IOException e) {
+                    Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
+                }
+
+                if (addressList.size() > 0) {
+                    Address address = addressList.get(0);
+                    String loc = address.getAddressLine(0);
+                    locationText.setText(loc);
+                    myLatLng = new LatLng(address.getLatitude(),address.getLongitude());
+                    Log.d(TAG, "ADDRESS: " + loc);
+
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
         //String doc_name, String comment, LatLng location, String photo, String time_stamp, int type
 //        setReport(getRandomString(), "hello",new LatLng(122,-231),"photo",new Date(),2);
@@ -185,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setReport(getRandomString(), comment.getText().toString(),new LatLng(122,-231),"photo",new Date(),accidentType);
+                setReport(getRandomString(), comment.getText().toString(),myLatLng,"photo",new Date(),accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
 
@@ -193,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             }
         });
-
 
         //cancel button onClickListener
         cancelButton.setOnClickListener(new View.OnClickListener() {
