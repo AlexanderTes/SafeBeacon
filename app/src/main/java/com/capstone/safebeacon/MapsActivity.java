@@ -34,6 +34,8 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +51,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
 
     LocationListener locationListener;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private DocumentReference noteRef = db.document("reports/1F1W5YT1NT13GHHHYGB5");
 
     //widgets
     private EditText searchText;

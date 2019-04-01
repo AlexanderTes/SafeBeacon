@@ -244,9 +244,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        }
 
         //String doc_name, String comment, LatLng location, String photo, String time_stamp, int type
 //        setReport(getRandomString(), "hello",new LatLng(122,-231),"photo",new Date(),2);
