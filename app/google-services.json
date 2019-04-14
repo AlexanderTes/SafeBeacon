@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "822490087346-sm4fbkphurvqufs4qgp8093bpp8igf6e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.capstone.safebeacon",
+            "certificate_hash": "0a2b8dce7e010d45e621ca8ceb158b39c24b03c4"
+          }
+        },
+        {
           "client_id": "822490087346-lk0vj9s95b5s9qu5k4pi35t3rjsk9146.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -25,15 +33,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "822490087346-lk0vj9s95b5s9qu5k4pi35t3rjsk9146.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -46,6 +52,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "822490087346-u80d9n5hse9ppeadmgm2atvec34a4o2h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.safebeacon",
+            "certificate_hash": "6063d53526a8a643216e55b758a61576fd38a4bf"
+          }
+        },
+        {
           "client_id": "822490087346-lk0vj9s95b5s9qu5k4pi35t3rjsk9146.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -56,15 +70,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "822490087346-lk0vj9s95b5s9qu5k4pi35t3rjsk9146.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
