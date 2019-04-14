@@ -6,7 +6,7 @@ android {
         applicationId "com.capstone.safebeacon"
         minSdkVersion 27
         targetSdkVersion 27
-        versionCode 1
+        versionCode 27
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

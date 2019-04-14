@@ -40,6 +40,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final String TAG = "TESTING";
     private static final int LENGTH_OF_RANDOM_STRING = 20;
+    private NotificationManagerCompat notificationManager;
+    
 
     private final int REQUEST_CODE = 20;
     private ImageView imageView1;
@@ -121,6 +127,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // db.collection("cities").document("new-city-id").set(data);
         // [END set_with_id]
     }
+	public void sendOnchannel1() {
+
+        Notification notification = new NotificationCompat.Builder(this, App.Channel_1_ID)
+                .setSmallIcon(R.drawable.ic_one)
+                .setContentTitle("Notification")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .build();
+
+        notificationManager.notify(1, notification);
+    }
 
     public void getAllUsers() {
         // [START get_all_users]
@@ -184,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final EditText comment = findViewById(R.id.comment);
         final TextView locationText = findViewById(R.id.location);
         imageView1 = findViewById(R.id.imageView1);
+        notificationManager = NotificationManagerCompat.from(this);
+        sendOnchannel1();
 
         Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(photoCaptureIntent, REQUEST_CODE);
