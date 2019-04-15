@@ -34,12 +34,16 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationListener locationListener;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference noteRef = db.document("reports/R52EIP13NI3HZQE7QGPN");
+
 
     //widgets
     private EditText searchText;
@@ -70,6 +74,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void updateMap(Location location) {
+        mMap.clear();
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
@@ -114,31 +119,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void loadNote() {
-        noteRef.get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+    public void loadNote(Location location) {
+
+        Geocoder geocoder = new Geocoder(MapsActivity.this);
+        List<Address> addressList = new ArrayList<>();
+        String city = "";
+
+        try {
+            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+        } catch (IOException e) {
+            Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
+        }
+
+        if (addressList.size() > 0) {
+            Address address = addressList.get(0);
+            city = address.getLocality();
+        }
+        db.collection("reports")
+                .whereEqualTo("city",city)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, "Load Note: " + document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting document: ", task.getException());
 
-                        if(documentSnapshot.exists()) {
-//                            String comment = documentSnapshot.getString("comment");
-//                            String locationSTr = documentSnapshot.getString("location");
-
-//                            Log.d(TAG, "Location: " + locationSTr);
-
-                            Map<String, Object> note = documentSnapshot.getData();
-                            Log.d(TAG,"Load Note: " + note.toString());
                         }
-                        else
-                            Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
                     }
                 });
+//                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                    @Override
+//                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+//
+//                        if(documentSnapshot.exists()) {
+////                            String comment = documentSnapshot.getString("comment");
+////                            String locationSTr = documentSnapshot.getString("location");
+//
+////                            Log.d(TAG, "Location: " + locationSTr);
+//
+//                            Map<String, Object> note = documentSnapshot.getData();
+//                            Log.d(TAG,"Load Note: " + note.toString());
+//                        }
+//                        else
+//                            Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//
+//                    }
+//                });
     }
 
     @Override
@@ -159,7 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        loadNote();
+//        loadNote("Duckwater"); // Testing
 
         init();
 
@@ -227,6 +262,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         String searchString = searchText.getText().toString();
 
+
         Geocoder geocoder = new Geocoder(MapsActivity.this);
         List<Address> addressList = new ArrayList<>();
 
@@ -279,6 +315,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if(switchView.isChecked())
                     updateMap(location);
+                loadNote(location);
             }
 
             @Override

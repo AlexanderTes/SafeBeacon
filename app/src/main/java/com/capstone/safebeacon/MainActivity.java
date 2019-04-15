@@ -42,6 +42,7 @@ import java.util.Random;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -49,26 +50,31 @@ import com.google.firebase.firestore.QuerySnapshot;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    CollectionReference collectionReference = db.collection("reports");
     private static final String TAG = "TESTING";
-    private static final int LENGTH_OF_RANDOM_STRING = 20;
+//    private static final int LENGTH_OF_RANDOM_STRING = 20;
+
+    private static final int LENGTH_OF_REPORT_ID = 20;
 
     private final int REQUEST_CODE = 20;
     private ImageView imageView1;
     private LatLng myLatLng;
+    private String cityName;
 
     int accidentType;
 
-    public void setReport(String doc_name, String comment, LatLng location, String photo, Date time_stamp, int type) {
+    public void setReport(String doc_name, String comment, String city, LatLng location, String photo, Date time_stamp, int type) {
         // [START set_document]
-        Map<String, Object> city = new HashMap<>();
-        city.put("comment", comment);
-        city.put("location", location);
-        city.put("photo", photo);
-        city.put("time_stamp", time_stamp);
-        city.put("type", type);
+        Map<String, Object> spot = new HashMap<>();
+        spot.put("comment", comment);
+        spot.put("city", city);
+        spot.put("location", location);
+        spot.put("photo", photo);
+        spot.put("time_stamp", time_stamp);
+        spot.put("type", type);
 
         db.collection("reports").document(doc_name)
-                .set(city)
+                .set(spot)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -160,17 +166,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // [END delete_document]
     }
 
-    protected String getRandomString() {
-        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    protected String getRandomString(int length_of_string) {
+        String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
-        while (salt.length() < LENGTH_OF_RANDOM_STRING) { // length of the random string.
+        while (salt.length() < length_of_string) { // length of the random string.
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
             salt.append(SALTCHARS.charAt(index));
         }
         String saltStr = salt.toString();
         return saltStr;
-
     }
 
     @Override
@@ -211,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 if (addressList.size() > 0) {
                     Address address = addressList.get(0);
+                    cityName = address.getLocality();
                     String loc = address.getAddressLine(0);
                     locationText.setText(loc);
                     myLatLng = new LatLng(address.getLatitude(),address.getLongitude());
@@ -256,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setReport(getRandomString(), comment.getText().toString(),myLatLng,"photo",new Date(),accidentType);
+                setReport(getRandomString(LENGTH_OF_REPORT_ID), comment.getText().toString(),cityName,myLatLng,"photo",new Date(),accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
 
