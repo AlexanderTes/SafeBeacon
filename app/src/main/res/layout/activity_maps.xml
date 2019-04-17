@@ -12,29 +12,202 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
         tools:context="com.daniel.safebeacon.MapsActivity" />
 
+    <RelativeLayout
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_alignParentTop="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/searchbox"/>
+
+        <EditText
+            android:id="@+id/input_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@null"
+            android:hint=" Enter Address, City, or Zipcode"
+            android:imeOptions="actionSearch"
+            android:inputType="textEmailAddress"
+            android:textColor="#000"
+            android:textSize="20sp"
+            tools:ignore="HardcodedText" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:id="@+id/toolbarBG1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:scaleType="fitXY"
+            android:src="@drawable/toolbarB" />
+
+        <RelativeLayout
+            android:layout_width="95dp"
+            android:layout_height="65dp"
+            android:layout_alignParentEnd="true">
+            <ImageView
+                android:id="@+id/buttonBG1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/buttonBG" />
+
+            <ImageButton
+                android:id="@+id/crimeIcon"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/crimeicon" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="95dp"
+            android:layout_height="65dp">
+            <ImageView
+                android:id="@+id/buttonBG2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/buttonBG" />
+
+            <ImageButton
+                android:id="@+id/accountIcon1"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/accounticonB" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:id="@+id/toolbarBG2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:scaleType="fitXY"
+            android:src="@drawable/toolbarO" />
+
+        <RelativeLayout
+            android:layout_width="95dp"
+            android:layout_height="65dp"
+            android:layout_alignParentEnd="true">
+            <ImageView
+                android:id="@+id/buttonBG3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/buttonBG" />
+
+            <ImageButton
+                android:id="@+id/carIcon"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_width="70dp"
+                android:layout_height="35dp"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/caricon" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="95dp"
+            android:layout_height="65dp">
+            <ImageView
+                android:id="@+id/buttonBG4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/buttonBG" />
+
+            <ImageButton
+                android:id="@+id/accountIcon2"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/accounticonO" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/circleBG1"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="80dp"
+        android:layout_height="79dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/circleBGcamera" />
 
     <ImageButton
         android:id="@+id/photoButton"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:scaleType="fitXY"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_report"
+        android:src="@drawable/cameraicon"
         android:background="@null" />
 
-    <!--<ImageButton-->
-        <!--android:id="@+id/locationButton"-->
-        <!--android:layout_width="40dp"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:layout_marginRight="10dp"-->
-        <!--android:layout_marginBottom="120dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:background="#fff"-->
-        <!--android:src="@drawable/ic_location"-->
-        <!--android:onClick="setMyLocation"/>-->
+    <ImageButton
+        android:id="@+id/searchButton"
+        android:layout_width="76dp"
+        android:layout_height="69dp"
+        android:layout_alignBottom="@+id/circleBG1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:src="@drawable/searchicon" />
+
+    <!--<ImageButton
+        android:id="@+id/locationButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="120dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="#fff"
+        android:src="@drawable/ic_location"
+        android:onClick="setMyLocation"/>
 
     <RelativeLayout
         android:id="@+id/relativeLayout2"
@@ -62,10 +235,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/imageView"
             android:background="@null"
-            android:hint=" Enter Address, City or Zipcode"
+            android:hint=" Enter Address, City, or Zipcode"
             android:imeOptions="actionSearch"
             android:inputType="textEmailAddress"
             android:textColor="#000"
@@ -82,8 +253,6 @@
         android:layout_marginRight="10dp"
         android:checked="false"
         android:theme="@style/SwitchCompatTheme"
-        tools:checked="false" />
-
-
+        tools:checked="false" />-->
 
 </RelativeLayout>
