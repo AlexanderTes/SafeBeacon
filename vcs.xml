@@ -14,6 +14,10 @@
           <option name="url" value="https://github.com/johnhowe/BlueTerm.git" />
           <option name="userName" value="" />
         </UrlAndUserName>
+        <UrlAndUserName>
+          <option name="url" value="https://github.com/kai-morich/SimpleBluetoothTerminal.git" />
+          <option name="userName" value="" />
+        </UrlAndUserName>
       </list>
     </option>
     <option name="cloneParentDir" value="C:\Users\Alexa\AndroidStudioProjects" />
