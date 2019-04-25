@@ -38,7 +38,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -47,8 +50,13 @@ import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -57,6 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     HeatmapTileProvider mProvider;
     private TileOverlay mOverlay;
 
+    ArrayList<Report> reports = new ArrayList<>();
+
     private int FIGHTING = 1;
     private int THEFT = 2;
     private int BURGLAR = 3;
@@ -64,6 +74,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int SEVERE_ACCIDENT = 5;
     private int CRIME = 6;
     private int WEIGHT_NUMBER = 20;
+
+    HashMap<Integer, String> accTypeStr;
+
+    BitmapDescriptor fightingBitmap;
+    BitmapDescriptor burglarBitmap;
+    BitmapDescriptor theftBitmap;
+    BitmapDescriptor crimeBitmap;
+    BitmapDescriptor minorAccidentBitmap;
+    BitmapDescriptor severeAccidentBitmap;
 
     private static final String TAG = "Testing";
 
@@ -100,6 +119,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,14));
 
         currLocMarker = marker;
+    }
+
+    public void moveToLocation(Location location, int zoom){
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(userLocation));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,zoom));
     }
 
     @Override
@@ -140,60 +165,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public void addMarker(ArrayList<Report> reports) {
+        for (int i = 0; i < reports.size(); i++) {
+            Report report = reports.get(i);
+            if (report.getAccidentType() == FIGHTING) {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(FIGHTING) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(fightingBitmap));
+            } else if (report.getAccidentType() == THEFT) {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(THEFT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(theftBitmap));
+            } else if (report.getAccidentType() == BURGLAR) {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(BURGLAR) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(burglarBitmap));
+            } else if (report.getAccidentType() == MINOR_ACCIDENT) {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(MINOR_ACCIDENT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(minorAccidentBitmap));
+            } else if (report.getAccidentType() == SEVERE_ACCIDENT) {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(SEVERE_ACCIDENT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(severeAccidentBitmap));
+            } else {
+                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                        .title(accTypeStr.get(CRIME) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
+                        .icon(crimeBitmap));
+            }
+        }
+        Log.d(TAG,"AddMarkers");
+    }
+
     public void loadNote() {
-
-//        Geocoder geocoder = new Geocoder(MapsActivity.this);
-//        List<Address> addressList = new ArrayList<>();
-//        String city = "";
-
-//        try {
-//            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-//        } catch (IOException e) {
-//            Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
-//        }
-
-//        if (addressList.size() > 0) {
-//            Address address = addressList.get(0);
-//            city = address.getLocality();
-//        }
-        db.collection("reports")
+        db.collection("police_reports")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if(task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "Load Note: " + document.getId() + " => " + document.getData());
+//                                List<Double> group = (List<Double>) document.get("location");
+                                String id = document.getId();
+                                Double lat = Double.parseDouble(document.get("latitude").toString());
+                                Double lng = Double.parseDouble(document.get("longtitude").toString());
+                                String time = document.get("time_stamp").toString();
+                                Integer type = Integer.parseInt(document.get("type").toString());
+                                reports.add(new Report(id,new LatLng(lat,lng),time, type));
+
+                                weightedLatLngs.add(new WeightedLatLng(new LatLng(lat,lng),type*WEIGHT_NUMBER));
+
+//                                Log.d(TAG, "LoadNote: " + reports.size());
                             }
                         } else {
                             Log.d(TAG, "Error getting document: ", task.getException());
 
                         }
+                        mMap.clear();
+                        if(switchView.isChecked())
+                            addMarker(reports);
+                        else
+                            addHeatMap(weightedLatLngs);
                     }
                 });
-//                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-//
-//                        if(documentSnapshot.exists()) {
-////                            String comment = documentSnapshot.getString("comment");
-////                            String locationSTr = documentSnapshot.getString("location");
-//
-////                            Log.d(TAG, "Location: " + locationSTr);
-//
-//                            Map<String, Object> note = documentSnapshot.getData();
-//                            Log.d(TAG,"Load Note: " + note.toString());
-//                        }
-//                        else
-//                            Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//
-//                    }
-//                });
     }
 
     @Override
@@ -210,6 +244,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         switchView.setChecked(true);
 
+        accTypeStr = new HashMap<Integer, String>();
+        accTypeStr.put(FIGHTING,"Fighting");
+        accTypeStr.put(THEFT,"Theft");
+        accTypeStr.put(BURGLAR,"Burglar");
+        accTypeStr.put(MINOR_ACCIDENT,"Minor Accident");
+        accTypeStr.put(SEVERE_ACCIDENT,"Severe Accident");
+        accTypeStr.put(CRIME,"Crime");
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -225,14 +267,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
-                    mMap.clear();
+                    loadNote();
 
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
-
-                    mMap.clear();
-                    addHeatMap(weightedLatLngs);
+                    loadNote();
                 }
             }
         });
@@ -244,15 +284,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
 
                 startActivity(intent);
-//                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-//                {
-//                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-//                }
-//                else
-//                {
-//                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
-//                }
             }
         });
 
@@ -310,6 +341,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            Toast.makeText(this, address.toString(),Toast.LENGTH_SHORT).show();
         }
     }
+
+    public Address geoLocateByLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(MapsActivity.this);
+        List<Address> addressList = new ArrayList<>();
+
+        try {
+            addressList = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1);
+        } catch (IOException e) {
+            Log.e(TAG, "geoLocateByLatLng: IOException:" + e.getMessage());
+        }
+
+        if (addressList.size() > 0) {
+            return addressList.get(0);
+        }
+        return null;
+    }
+
     private void addHeatMap(ArrayList<WeightedLatLng> list) {
         // Create the gradient.
         int[] colors = {
@@ -346,16 +394,58 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+//    protected String getRandomString(int length_of_string) {
+//        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+//        StringBuilder salt = new StringBuilder();
+//        Random rnd = new Random();
+//        while (salt.length() < length_of_string) { // length of the random string.
+//            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+//            salt.append(SALTCHARS.charAt(index));
+//        }
+//        String saltStr = salt.toString();
+//        return saltStr;
+//    }
+//
+//    private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
+//    public String parseTime(Date date, String format){
+//        SimpleDateFormat output = new SimpleDateFormat(format);
+//        return output.format(date);
+//    }
+//    CollectionReference policeReportRef = db.collection("police_reports");
+//    public void setPoliceReport(String doc_name, LatLng location, Date time_stamp, int type) {
+//        // [START set_document]
+//        Map<String, Object> spot = new HashMap<>();
+//        spot.put("latitude", location.latitude);
+//        spot.put("longtitude", location.longitude);
+//        spot.put("time_stamp", time_stamp);
+//        spot.put("type", type);
+//
+//        policeReportRef.document(doc_name)
+//                .set(spot)
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.w(TAG, "Error writing document", e);
+//                    }
+//                });
+//    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        BitmapDescriptor fighting = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
-        BitmapDescriptor burglar = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
-        BitmapDescriptor theft = BitmapDescriptorFactory.fromResource(R.drawable.theft);
-        BitmapDescriptor crime = BitmapDescriptorFactory.fromResource(R.drawable.crime);
-        BitmapDescriptor minorAccident = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
-        BitmapDescriptor severeAccident = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
+        fightingBitmap = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
+        burglarBitmap = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
+        theftBitmap = BitmapDescriptorFactory.fromResource(R.drawable.theft);
+        crimeBitmap = BitmapDescriptorFactory.fromResource(R.drawable.crime);
+        minorAccidentBitmap = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
+        severeAccidentBitmap = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
         myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
 
         ArrayList<LatLng> latLngs = new ArrayList<>();
@@ -412,50 +502,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-        latLngs.add(new LatLng(33.556242, -101.801492));
-        latLngs.add(new LatLng(33.541580, -101.900734));
-        latLngs.add(new LatLng(33.573734, -101.926059));
-        latLngs.add(new LatLng(33.605888, -101.870524));
-        latLngs.add(new LatLng(33.591225, -101.814989));
-        latLngs.add(new LatLng(33.533765, -101.840314));
-        latLngs.add(new LatLng(33.608716, -101.939556));
-        latLngs.add(new LatLng(33.551256, -101.884021));
-        latLngs.add(new LatLng(33.583410, -101.909346));
-        latLngs.add(new LatLng(33.568747, -101.853811));
-        latLngs.add(new LatLng(33.600901, -101.879136));
-        latLngs.add(new LatLng(33.543441, -101.823601));
-        latLngs.add(new LatLng(33.528779, -101.922843));
-        latLngs.add(new LatLng(33.560933, -101.793391));
-        latLngs.add(new LatLng(33.546270, -101.892633));
-        latLngs.add(new LatLng(33.578424, -101.837099));
-        latLngs.add(new LatLng(33.610578, -101.862423));
-        latLngs.add(new LatLng(33.595915, -101.806888));
-        latLngs.add(new LatLng(33.538455, -101.832213));
-        latLngs.add(new LatLng(33.570609, -101.931455));
-
-
-        for (int i = 0; i < latLngs.size(); i++) {
-            if (i % 6 == FIGHTING) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(fighting));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),FIGHTING*WEIGHT_NUMBER));
-                Log.d(TAG, latLngs.get(i).toString());
-            } else if (i % 6 == THEFT) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(theft));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),THEFT*WEIGHT_NUMBER));
-            } else if (i % 6 == BURGLAR) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglar));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),BURGLAR *WEIGHT_NUMBER));
-            } else if (i % 6 == MINOR_ACCIDENT) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(minorAccident));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),MINOR_ACCIDENT*WEIGHT_NUMBER));
-            } else if (i % 6 == SEVERE_ACCIDENT) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(severeAccident));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),SEVERE_ACCIDENT*WEIGHT_NUMBER));
-            } else {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(crime));
-                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),CRIME*WEIGHT_NUMBER));
-            }
-        }
+//        latLngs.add(new LatLng(33.556242, -101.801492));
+//        latLngs.add(new LatLng(33.541580, -101.900734));
+//        latLngs.add(new LatLng(33.573734, -101.926059));
+//        latLngs.add(new LatLng(33.605888, -101.870524));
+//        latLngs.add(new LatLng(33.591225, -101.814989));
+//        latLngs.add(new LatLng(33.533765, -101.840314));
+//        latLngs.add(new LatLng(33.608716, -101.939556));
+//        latLngs.add(new LatLng(33.551256, -101.884021));
+//        latLngs.add(new LatLng(33.583410, -101.909346));
+//        latLngs.add(new LatLng(33.568747, -101.853811));
+//        latLngs.add(new LatLng(33.600901, -101.879136));
+//        latLngs.add(new LatLng(33.543441, -101.823601));
+//        latLngs.add(new LatLng(33.528779, -101.922843));
+//        latLngs.add(new LatLng(33.560933, -101.793391));
+//        latLngs.add(new LatLng(33.546270, -101.892633));
+//        latLngs.add(new LatLng(33.578424, -101.837099));
+//        latLngs.add(new LatLng(33.610578, -101.862423));
+//        latLngs.add(new LatLng(33.595915, -101.806888));
+//        latLngs.add(new LatLng(33.538455, -101.832213));
+//        latLngs.add(new LatLng(33.570609, -101.931455));
+//
+//
+//        for (int i = 0; i < latLngs.size(); i++) {
+//            Date date = new Date();
+//            if (i % 6 == FIGHTING) {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(fightingBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),FIGHTING*WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,FIGHTING);
+//            } else if (i % 6 == THEFT) {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(theftBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),THEFT*WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,THEFT);
+//            } else if (i % 6 == BURGLAR) {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglarBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),BURGLAR *WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,BURGLAR);
+//            } else if (i % 6 == MINOR_ACCIDENT) {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(minorAccidentBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),MINOR_ACCIDENT*WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,MINOR_ACCIDENT);
+//            } else if (i % 6 == SEVERE_ACCIDENT) {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(severeAccidentBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),SEVERE_ACCIDENT*WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,SEVERE_ACCIDENT);
+//            } else {
+//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(crimeBitmap));
+//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),CRIME*WEIGHT_NUMBER));
+////                setPoliceReport(getRandomString(10),latLngs.get(i),date,CRIME);
+//            }
+//        }
 
 
 //        mMap2.setMyLocationEnabled(true);
