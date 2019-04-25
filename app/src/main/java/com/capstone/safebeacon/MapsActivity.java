@@ -204,6 +204,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if(task.isSuccessful()) {
+                            reports.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
 //                                List<Double> group = (List<Double>) document.get("location");
                                 String id = document.getId();
@@ -226,6 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             addMarker(reports);
                         else
                             addHeatMap(weightedLatLngs);
+                        Log.d(TAG, "LoadNote-inloop: " + reports.size());
                     }
                 });
     }
@@ -451,6 +453,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayList<LatLng> latLngs = new ArrayList<>();
 
         loadNote();
+        Log.d(TAG, "LoadNote: " + reports.size());
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
