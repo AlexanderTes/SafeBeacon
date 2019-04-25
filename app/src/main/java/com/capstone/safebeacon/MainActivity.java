@@ -10,7 +10,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -56,16 +58,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private static final int LENGTH_OF_REPORT_ID = 20;
 
-    private final int REQUEST_CODE = 20;
+    private final int REQUEST_CODE = 100;
     private ImageView imageView1;
     private LatLng myLatLng;
     private String cityName;
+    private String userId;
 
     int accidentType;
 
-    public void setReport(String doc_name, String comment, String city, LatLng location, String photo, Date time_stamp, int type) {
+    public void setReport(String doc_name, String id, String comment, String city, LatLng location, String photo, Date time_stamp, int type) {
         // [START set_document]
         Map<String, Object> spot = new HashMap<>();
+        spot.put("userId",id);
         spot.put("comment", comment);
         spot.put("city", city);
         spot.put("location", location);
@@ -73,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spot.put("time_stamp", time_stamp);
         spot.put("type", type);
 
-        db.collection("reports").document(doc_name)
+        collectionReference.document(doc_name)
                 .set(spot)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -167,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     protected String getRandomString(int length_of_string) {
-        String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
         while (salt.length() < length_of_string) { // length of the random string.
@@ -188,16 +192,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Button cancelButton = findViewById(R.id.cancelButton);
         final EditText comment = findViewById(R.id.comment);
         final TextView locationText = findViewById(R.id.location);
+        final TextView userIdTextView = findViewById(R.id.userId);
         imageView1 = findViewById(R.id.imageView1);
 
         Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(photoCaptureIntent, REQUEST_CODE);
+
+        userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         //add accident Types to spinner
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.accidentTypes, android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(this);
+
+        userIdTextView.setText(userId);
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -241,6 +250,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         };
 
+    //        int requestCode = 1;
+    //
+    //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+    //            if (ActivityCompat.checkSelfPermission(this,Manifest.permission.CAMERA)  != PackageManager.PERMISSION_GRANTED) {
+    //                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA},requestCode);
+    //            }
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -262,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setReport(getRandomString(LENGTH_OF_REPORT_ID), comment.getText().toString(),cityName,myLatLng,"photo",new Date(),accidentType);
+                setReport(getRandomString(LENGTH_OF_REPORT_ID),userId, comment.getText().toString(),cityName,myLatLng,"photo",new Date(),accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
 
@@ -289,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(this.REQUEST_CODE == requestCode && resultCode == RESULT_OK){
             Bitmap bitmap = (Bitmap)data.getExtras().get("data");
             imageView1.setImageBitmap(bitmap);
-            Log.d(TAG, "IMAGE VIEW HERE");
         }
 
     }

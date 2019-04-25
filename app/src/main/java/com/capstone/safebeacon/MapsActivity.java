@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,7 +25,6 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,32 +33,46 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.maps.android.heatmaps.Gradient;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    HeatmapTileProvider mProvider;
+    private TileOverlay mOverlay;
+
+    private int FIGHTING = 1;
+    private int THEFT = 2;
+    private int BURGLAR = 3;
+    private int MINOR_ACCIDENT = 4;
+    private int SEVERE_ACCIDENT = 5;
+    private int CRIME = 6;
+    private int WEIGHT_NUMBER = 20;
+
     private static final String TAG = "Testing";
 
     LocationManager locationManager;
 
     LocationListener locationListener;
+    Location currentLocation;
+
+    private Marker currLocMarker;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -69,16 +83,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Switch switchView;
     BitmapDescriptor myLocationIC;
 
+
+    ArrayList<WeightedLatLng> weightedLatLngs = new ArrayList<>();
+
 //    private static final int CAMERA_REQUEST = 1888;
 //    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
 
-    public void updateMap(Location location) {
-        mMap.clear();
+    public void zoomToCurrentLocation(Location location) {
+        if(currLocMarker != null) {
+            currLocMarker.remove();
+        }
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
+        Marker marker = mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,14));
+
+        currLocMarker = marker;
     }
 
     @Override
@@ -91,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
                     Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    updateMap(lastLocation);
+                    zoomToCurrentLocation(lastLocation);
                 }
             }
         }
@@ -119,24 +140,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void loadNote(Location location) {
+    public void loadNote() {
 
-        Geocoder geocoder = new Geocoder(MapsActivity.this);
-        List<Address> addressList = new ArrayList<>();
-        String city = "";
+//        Geocoder geocoder = new Geocoder(MapsActivity.this);
+//        List<Address> addressList = new ArrayList<>();
+//        String city = "";
 
-        try {
-            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-        } catch (IOException e) {
-            Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
-        }
+//        try {
+//            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+//        } catch (IOException e) {
+//            Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
+//        }
 
-        if (addressList.size() > 0) {
-            Address address = addressList.get(0);
-            city = address.getLocality();
-        }
+//        if (addressList.size() > 0) {
+//            Address address = addressList.get(0);
+//            city = address.getLocality();
+//        }
         db.collection("reports")
-                .whereEqualTo("city",city)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -183,6 +203,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         searchText = findViewById(R.id.input_search);
         switchView = findViewById(R.id.switchView);
+        final ImageButton currLocButton = findViewById(R.id.currLocButton);
 
         final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
         final ImageButton photoButton = findViewById(R.id.photoButton);
@@ -204,14 +225,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
-
-                    mMap.getUiSettings().setZoomControlsEnabled(false);
+                    mMap.clear();
 
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
 
-                    mMap.getUiSettings().setZoomControlsEnabled(true);
+                    mMap.clear();
+                    addHeatMap(weightedLatLngs);
                 }
             }
         });
@@ -232,6 +253,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 //                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
 //                }
+            }
+        });
+
+        currLocButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                zoomToCurrentLocation(currentLocation);
             }
         });
 
@@ -282,6 +310,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            Toast.makeText(this, address.toString(),Toast.LENGTH_SHORT).show();
         }
     }
+    private void addHeatMap(ArrayList<WeightedLatLng> list) {
+        // Create the gradient.
+        int[] colors = {
+//                Color.rgb(102, 225, 0), // green
+//                Color.rgb(255, 0, 0)    // red
+                Color.GREEN,    // green
+                Color.YELLOW,    // yellow
+                Color.RED              //red
+        };
+
+        float[] startPoints = {
+                0.2f, 0.6f, 1f
+        };
+
+        Gradient gradient = new Gradient(colors, startPoints);
+
+        // Create a heat map tile provider, passing it the latlngs of the police stations.
+        mProvider = new HeatmapTileProvider.Builder()
+                .weightedData(list)
+                .gradient(gradient)
+                .build();
+        // Add a tile overlay to the map, using the heat map tile provider.
+        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+    }
+
 
 
     /**
@@ -307,15 +360,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         ArrayList<LatLng> latLngs = new ArrayList<>();
 
+        loadNote();
+
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
-                if(switchView.isChecked())
-                    updateMap(location);
-                loadNote(location);
+//                if(switchView.isChecked())
+//                    zoomToCurrentLocation(location);
+                currentLocation = location;
+
             }
 
             @Override
@@ -349,7 +407,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(lastLocation != null) {
-                updateMap(lastLocation);
+                zoomToCurrentLocation(lastLocation);
             }
         }
 
@@ -377,18 +435,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         for (int i = 0; i < latLngs.size(); i++) {
-            if (i % 6 == 1) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(theft));
-            } else if (i % 6 == 2) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(fighting));
-            } else if (i % 6 == 3) {
+            if (i % 6 == FIGHTING) {
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(fighting));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),FIGHTING*WEIGHT_NUMBER));
+                Log.d(TAG, latLngs.get(i).toString());
+            } else if (i % 6 == THEFT) {
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(theft));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),THEFT*WEIGHT_NUMBER));
+            } else if (i % 6 == BURGLAR) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglar));
-            } else if (i % 6 == 4) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(crime));
-            } else if (i % 6 == 5) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(minorAccident));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),BURGLAR *WEIGHT_NUMBER));
+            } else if (i % 6 == MINOR_ACCIDENT) {
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(minorAccident));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),MINOR_ACCIDENT*WEIGHT_NUMBER));
+            } else if (i % 6 == SEVERE_ACCIDENT) {
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(severeAccident));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),SEVERE_ACCIDENT*WEIGHT_NUMBER));
             } else {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(severeAccident));
+                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(crime));
+                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),CRIME*WEIGHT_NUMBER));
             }
         }
 
