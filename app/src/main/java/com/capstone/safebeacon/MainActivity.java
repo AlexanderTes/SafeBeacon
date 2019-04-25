@@ -10,6 +10,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ParseException;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -34,6 +35,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //    private static final int LENGTH_OF_RANDOM_STRING = 20;
 
     private static final int LENGTH_OF_REPORT_ID = 20;
+    private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
 
     private final int REQUEST_CODE = 100;
     private ImageView imageView1;
@@ -65,6 +68,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private String userId;
 
     int accidentType;
+
+    public String parseTime(Date date, String format){
+        SimpleDateFormat output = new SimpleDateFormat(format);
+
+        return output.format(date);
+    }
 
     public void setReport(String doc_name, String id, String comment, String city, LatLng location, String photo, Date time_stamp, int type) {
         // [START set_document]
@@ -101,74 +110,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // [END set_with_id]
     }
 
-    public void setPreference(String doc_name, int alert_level, int alert_radius, String name, String phone_num) {
-        // [START set_document]
-        Map<String, Object> city = new HashMap<>();
-        city.put("alert_level", alert_level);
-        city.put("alert_radius", alert_radius);
-        city.put("name", name);
-        city.put("phone_num", phone_num);
-
-        db.collection("user_preferences").document(doc_name)
-                .set(city)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-        // [END set_document]
-
-//        Map<String, Object> data = new HashMap<>();
-
-        // [START set_with_id]
-        // db.collection("cities").document("new-city-id").set(data);
-        // [END set_with_id]
-    }
-
-    public void getAllUsers() {
-        // [START get_all_users]
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-        // [END get_all_users]
-    }
-
-    public void deleteDocument(String var1) {
-        // [START delete_document]
-        db.collection("users").document(var1)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
-                    }
-                });
-        // [END delete_document]
-    }
+//    public void getAllUsers() {
+//        // [START get_all_users]
+//        db.collection("users")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                            }
+//                        } else {
+//                            Log.d(TAG, "Error getting documents.", task.getException());
+//                        }
+//                    }
+//                });
+//        // [END get_all_users]
+//    }
 
     protected String getRandomString(int length_of_string) {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -278,7 +237,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setReport(getRandomString(LENGTH_OF_REPORT_ID),userId, comment.getText().toString(),cityName,myLatLng,"photo",new Date(),accidentType);
+                Date date = new Date();
+                setReport(parseTime(date,TIME_FORMAT_FOR_ID),userId, comment.getText().toString(),cityName,myLatLng,"photo",date,accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
 
