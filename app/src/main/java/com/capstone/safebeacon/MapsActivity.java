@@ -9,6 +9,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -62,9 +63,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //widgets
     private EditText searchText;
 
-    private Switch switchView;
-    BitmapDescriptor myLocationIC;
-
 //    private static final int CAMERA_REQUEST = 1888;
 //    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
@@ -72,7 +70,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void updateMap(Location location) {
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,14));
     }
 
@@ -146,13 +143,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        searchText = findViewById(R.id.input_search);
-        switchView = findViewById(R.id.switchView);
-
-        final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
+        //searchText = findViewById(R.id.input_search);
+        final ImageButton crimeView = findViewById(R.id.crimeIcon);
+        final ImageButton carView = findViewById(R.id.carIcon);
         final ImageButton photoButton = findViewById(R.id.photoButton);
-
-        switchView.setChecked(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -163,21 +157,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         init();
 
-        switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        carView.setOnClickListener(new View.OnClickListener(){
+
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    reLay2.setVisibility(View.INVISIBLE);
-                    photoButton.setVisibility(View.VISIBLE);
+            public void onClick(View view) {
+                setContentView(R.layout.activity_maps);
+            }
+        });
 
-                    mMap.getUiSettings().setZoomControlsEnabled(false);
+        crimeView.setOnClickListener(new View.OnClickListener(){
 
-                } else {
-                    reLay2.setVisibility(View.VISIBLE);
-                    photoButton.setVisibility(View.INVISIBLE);
-
-                    mMap.getUiSettings().setZoomControlsEnabled(true);
-                }
+            @Override
+            public void onClick(View view) {
+                setContentView(R.layout.activity_crime);
             }
         });
 
@@ -261,14 +253,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        BitmapDescriptor fighting = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
-        BitmapDescriptor burglar = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
-        BitmapDescriptor theft = BitmapDescriptorFactory.fromResource(R.drawable.theft);
-        BitmapDescriptor crime = BitmapDescriptorFactory.fromResource(R.drawable.crime);
-        BitmapDescriptor minorAccident = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
-        BitmapDescriptor severeAccident = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
-        myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
-
         ArrayList<LatLng> latLngs = new ArrayList<>();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -277,8 +261,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onLocationChanged(Location location) {
 
-                if(switchView.isChecked())
-                    updateMap(location);
             }
 
             @Override
@@ -337,23 +319,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         latLngs.add(new LatLng(33.595915, -101.806888));
         latLngs.add(new LatLng(33.538455, -101.832213));
         latLngs.add(new LatLng(33.570609, -101.931455));
-
-
-        for (int i = 0; i < latLngs.size(); i++) {
-            if (i % 6 == 1) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(theft));
-            } else if (i % 6 == 2) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(fighting));
-            } else if (i % 6 == 3) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglar));
-            } else if (i % 6 == 4) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(crime));
-            } else if (i % 6 == 5) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(minorAccident));
-            } else {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(severeAccident));
-            }
-        }
 
 
 //        mMap2.setMyLocationEnabled(true);

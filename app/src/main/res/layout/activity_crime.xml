@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/incidentView"
+    android:id="@+id/searchView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.capstone.safebeacon.MapsActivity">
@@ -22,22 +22,50 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="65dp"
+            android:layout_alignParentTop="true">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/searchbox"/>
+
+            <EditText
+                android:id="@+id/input_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@null"
+                android:hint=" Enter Address, City, or Zipcode"
+                android:imeOptions="actionSearch"
+                android:inputType="textEmailAddress"
+                android:textColor="#000"
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
             android:layout_alignParentBottom="true">
 
             <ImageView
-                android:id="@+id/toolbarBG1"
+                android:id="@+id/toolbarBG2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:scaleType="fitXY"
-                android:src="@drawable/toolbar1" />
+                android:src="@drawable/toolbar2" />
 
             <RelativeLayout
                 android:layout_width="95dp"
                 android:layout_height="65dp"
                 android:layout_alignParentEnd="true">
                 <ImageView
-                    android:id="@+id/buttonBG1"
+                    android:id="@+id/buttonBG3"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@null"
@@ -45,22 +73,21 @@
                     android:src="@drawable/buttongrey" />
 
                 <ImageButton
-                    android:id="@+id/crimeIcon"
+                    android:id="@+id/carIcon"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="70dp"
+                    android:layout_height="35dp"
                     android:background="@null"
                     android:scaleType="fitXY"
-                    android:src="@drawable/crimeicon" />
-
+                    android:src="@drawable/caricon" />
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="95dp"
                 android:layout_height="65dp">
                 <ImageView
-                    android:id="@+id/buttonBG2"
+                    android:id="@+id/buttonBG4"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@null"
@@ -68,21 +95,20 @@
                     android:src="@drawable/buttongrey" />
 
                 <ImageButton
-                    android:id="@+id/accountIcon1"
+                    android:id="@+id/accountIcon2"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@null"
                     android:scaleType="fitXY"
-                    android:src="@drawable/accounticon1" />
-
+                    android:src="@drawable/accounticon2" />
             </RelativeLayout>
 
         </RelativeLayout>
 
         <ImageView
-            android:id="@+id/circleBG2"
+            android:id="@+id/circleBG1"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_width="80dp"
@@ -90,17 +116,18 @@
             android:background="@null"
             android:scaleType="fitXY"
             android:src="@drawable/circlecamera" />
+
         <ImageButton
-            android:id="@+id/photoButton"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:scaleType="fitXY"
+            android:id="@+id/searchButton"
+            android:layout_width="76dp"
+            android:layout_height="69dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/cameraicon"
-            android:background="@null" />
+            android:layout_marginBottom="5dp"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/searchicon"/>
     </RelativeLayout>
-
     <!--<ImageButton
         android:id="@+id/locationButton"
         android:layout_width="40dp"
