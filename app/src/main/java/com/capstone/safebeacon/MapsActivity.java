@@ -1,6 +1,7 @@
 package com.capstone.safebeacon;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,9 +12,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -38,11 +42,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.android.heatmaps.Gradient;
@@ -50,13 +54,10 @@ import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -87,6 +88,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String TAG = "Testing";
 
     LocationManager locationManager;
+    private int i;
+    private NotificationManagerCompat notificationManager;
 
     LocationListener locationListener;
     Location currentLocation;
@@ -255,12 +258,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         accTypeStr.put(SEVERE_ACCIDENT,"Severe Accident");
         accTypeStr.put(CRIME,"Crime");
 
+        listenToMultiple();
+        notificationManager = NotificationManagerCompat.from(this);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        loadNote("Duckwater"); // Testing
+        loadNote();
+        Log.d(TAG, "LoadNote: " + reports.size());
 
         init();
 
@@ -341,6 +348,63 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
 //            Toast.makeText(this, address.toString(),Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void listenToMultiple() {
+        db.collection("reports")
+                //.whereEqualTo("state", "CA")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "New city: " + dc.getDocument().getData());
+                                    Double lat = Double.parseDouble(dc.getDocument().get("latitude").toString());
+                                    Double lng = Double.parseDouble(dc.getDocument().get("longitude").toString());
+                                    Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
+                                            .setSmallIcon(R.drawable.ic_one)
+                                            .setContentTitle(dc.getDocument().get("type").toString())
+                                            .setContentText("dfdfdfdf")
+                                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                                            .build();
+
+                                    if(i == 1) {
+                                        notificationManager.notify(1,notification);
+                                    }
+                                    break;
+                            }
+                        }
+
+                        List<Date> comment = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get("time_stamp") != null) {
+                                comment.add(doc.getDate("time_stamp"));
+                                Log.d(TAG, "Current cites in CA: " + comment);
+
+//                                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
+//                                        .setSmallIcon(R.drawable.ic_one)
+//                                        .setContentTitle("NotificationChannel")
+//                                        .setContentText("Report is submitted or deleted")
+//                                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+//                                        .build();
+//
+//                                if(i == 1) {
+//                                    notificationManager.notify(1,notification);
+//                                }
+                            }
+                        }
+                        i = 1;
+                    }
+                });
     }
 
     public Address geoLocateByLatLng(LatLng latLng) {
@@ -450,9 +514,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
 
         ArrayList<LatLng> latLngs = new ArrayList<>();
-
-        loadNote();
-        Log.d(TAG, "LoadNote: " + reports.size());
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 

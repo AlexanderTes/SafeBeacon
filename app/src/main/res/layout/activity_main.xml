@@ -9,14 +9,33 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorPost"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="169dp">
+        tools:layout_editor_absoluteX="48dp"
+        tools:layout_editor_absoluteY="16dp">
+
+        <FrameLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:background="#5A5656"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/userIdLayout"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -132,7 +151,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown"/>
+            android:spinnerMode="dropdown" />
 
         <LinearLayout
             android:id="@+id/buttonLayout"
@@ -145,8 +164,8 @@
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="CANCEL"
-                android:background="@color/colorCheck"/>
+                android:background="@color/colorCheck"
+                android:text="CANCEL" />
 
             <Button
                 android:id="@+id/button3"
@@ -154,15 +173,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Button"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/submitButton"
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="SUBMIT"
-                android:background="@color/colorPost"/>
+                android:background="@color/colorPost"
+                android:text="SUBMIT" />
         </LinearLayout>
 
     </LinearLayout>
