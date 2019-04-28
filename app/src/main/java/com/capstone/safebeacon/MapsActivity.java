@@ -110,7 +110,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void zoomToCurrentLocation(Location location) {
-        if(currLocMarker != null) {
+
+        if(currLocMarker != null) { //Check if the marker is null
             currLocMarker.remove();
         }
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
@@ -269,13 +270,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
-                    loadNote();
-
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
-                    loadNote();
                 }
+                loadNote();
             }
         });
 
@@ -376,7 +375,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Gradient gradient = new Gradient(colors, startPoints);
 
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
+        // Create a heat map tile provider, passing it the latlngs of the police reports.
         mProvider = new HeatmapTileProvider.Builder()
                 .weightedData(list)
                 .gradient(gradient)
@@ -503,61 +502,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 zoomToCurrentLocation(lastLocation);
             }
         }
-
-
-//        latLngs.add(new LatLng(33.556242, -101.801492));
-//        latLngs.add(new LatLng(33.541580, -101.900734));
-//        latLngs.add(new LatLng(33.573734, -101.926059));
-//        latLngs.add(new LatLng(33.605888, -101.870524));
-//        latLngs.add(new LatLng(33.591225, -101.814989));
-//        latLngs.add(new LatLng(33.533765, -101.840314));
-//        latLngs.add(new LatLng(33.608716, -101.939556));
-//        latLngs.add(new LatLng(33.551256, -101.884021));
-//        latLngs.add(new LatLng(33.583410, -101.909346));
-//        latLngs.add(new LatLng(33.568747, -101.853811));
-//        latLngs.add(new LatLng(33.600901, -101.879136));
-//        latLngs.add(new LatLng(33.543441, -101.823601));
-//        latLngs.add(new LatLng(33.528779, -101.922843));
-//        latLngs.add(new LatLng(33.560933, -101.793391));
-//        latLngs.add(new LatLng(33.546270, -101.892633));
-//        latLngs.add(new LatLng(33.578424, -101.837099));
-//        latLngs.add(new LatLng(33.610578, -101.862423));
-//        latLngs.add(new LatLng(33.595915, -101.806888));
-//        latLngs.add(new LatLng(33.538455, -101.832213));
-//        latLngs.add(new LatLng(33.570609, -101.931455));
-//
-//
-//        for (int i = 0; i < latLngs.size(); i++) {
-//            Date date = new Date();
-//            if (i % 6 == FIGHTING) {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(fightingBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),FIGHTING*WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,FIGHTING);
-//            } else if (i % 6 == THEFT) {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(theftBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),THEFT*WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,THEFT);
-//            } else if (i % 6 == BURGLAR) {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglarBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),BURGLAR *WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,BURGLAR);
-//            } else if (i % 6 == MINOR_ACCIDENT) {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(minorAccidentBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),MINOR_ACCIDENT*WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,MINOR_ACCIDENT);
-//            } else if (i % 6 == SEVERE_ACCIDENT) {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(severeAccidentBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),SEVERE_ACCIDENT*WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,SEVERE_ACCIDENT);
-//            } else {
-//                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(crimeBitmap));
-//                weightedLatLngs.add(new WeightedLatLng(latLngs.get(i),CRIME*WEIGHT_NUMBER));
-////                setPoliceReport(getRandomString(10),latLngs.get(i),date,CRIME);
-//            }
-//        }
-
-
-//        mMap2.setMyLocationEnabled(true);
 
     }
 

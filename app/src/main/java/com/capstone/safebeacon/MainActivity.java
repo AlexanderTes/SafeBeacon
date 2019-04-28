@@ -10,8 +10,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ParseException;
-import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -40,16 +38,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -61,8 +54,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final int LENGTH_OF_REPORT_ID = 20;
     private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
 
-    private final int REQUEST_CODE = 100;
+    private final int REQUEST_IMAGE_CAPTURE_CODE = 100;
     private ImageView imageView1;
+    private ImageView imageView2;
+    private ImageView imageView3;
+    private int atImage = 1;
     private LatLng myLatLng;
     private String cityName;
     private String userId;
@@ -155,9 +151,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final TextView locationText = findViewById(R.id.location);
         final TextView userIdTextView = findViewById(R.id.userId);
         imageView1 = findViewById(R.id.imageView1);
+        imageView2 = findViewById(R.id.imageView2);
+        imageView3 = findViewById(R.id.imageView3);
 
-        Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(photoCaptureIntent, REQUEST_CODE);
+        //Open camera Intent and get result
+        Intent photoCaptureIntent1 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(photoCaptureIntent1, REQUEST_IMAGE_CAPTURE_CODE);
 
         userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -261,9 +260,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(this.REQUEST_CODE == requestCode && resultCode == RESULT_OK){
+        if(this.REQUEST_IMAGE_CAPTURE_CODE == requestCode && resultCode == RESULT_OK){
             Bitmap bitmap = (Bitmap)data.getExtras().get("data");
-            imageView1.setImageBitmap(bitmap);
+            if(atImage == 1){
+                imageView1.setImageBitmap(bitmap);
+            } else if (atImage == 2){
+                imageView2.setImageBitmap(bitmap);
+            } else {
+                imageView3.setImageBitmap(bitmap);
+            }
         }
 
     }
@@ -284,4 +289,25 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
+    void imageViewClick(View v) {
+        Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(photoCaptureIntent, REQUEST_IMAGE_CAPTURE_CODE);
+        switch (v.getId()){
+            case R.id.imageView1:
+                //Set to change image
+                atImage = 1;
+                break;
+            case R.id.imageView2:
+                //Set to change image
+                atImage = 2;
+                break;
+            case R.id.imageView3:
+                //Set to change image
+                atImage = 3;
+                break;
+        }
+    }
+
+
 }
