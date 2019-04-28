@@ -1,6 +1,7 @@
 package com.capstone.safebeacon;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,9 +11,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,10 +43,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -53,8 +62,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String TAG = "Testing";
 
     LocationManager locationManager;
-
+    int i;
     LocationListener locationListener;
+    private NotificationManagerCompat notificationManager;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DocumentReference noteRef = db.document("reports/R52EIP13NI3HZQE7QGPN");
@@ -148,11 +158,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         searchText = findViewById(R.id.input_search);
         switchView = findViewById(R.id.switchView);
-
         final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
         final ImageButton photoButton = findViewById(R.id.photoButton);
-
         switchView.setChecked(true);
+        listenToMultiple();
+        notificationManager = NotificationManagerCompat.from(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -247,6 +257,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void listenToMultiple() {
+        db.collection("reports")
+                //.whereEqualTo("state", "CA")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        List<Date> comment = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get("time_stamp") != null) {
+                                comment.add(doc.getDate("time_stamp"));
+                                Log.d(TAG, "Current cites in CA: " + comment);
+
+                                Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.Channel_1_ID)
+                                        .setSmallIcon(R.drawable.ic_one)
+                                        .setContentTitle("Notification")
+                                        .setContentText("Report is submitted or deleted")
+                                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                                        .build();
+
+                                if(i == 1) {
+                                    notificationManager.notify(1,notification);
+                                }
+                            }
+                        }
+                        i = 1;
+                    }
+                });
+    }
+
 
     /**
      * Manipulates the map once available.
@@ -316,7 +362,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-
         latLngs.add(new LatLng(33.556242, -101.801492));
         latLngs.add(new LatLng(33.541580, -101.900734));
         latLngs.add(new LatLng(33.573734, -101.926059));
@@ -338,7 +383,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         latLngs.add(new LatLng(33.538455, -101.832213));
         latLngs.add(new LatLng(33.570609, -101.931455));
 
-
         for (int i = 0; i < latLngs.size(); i++) {
             if (i % 6 == 1) {
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(theft));
@@ -354,11 +398,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(severeAccident));
             }
         }
-
-
-//        mMap2.setMyLocationEnabled(true);
-
     }
-
-
 }

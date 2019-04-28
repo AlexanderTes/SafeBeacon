@@ -5,13 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -31,7 +37,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -46,21 +59,34 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import static com.capstone.safebeacon.App.Channel_1_ID;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final String TAG = "TESTING";
     private static final int LENGTH_OF_RANDOM_STRING = 20;
-    private NotificationManagerCompat notificationManager;
-    
+    //private NotificationManagerCompat notificationManager;
 
+    private static final int REQUEST_CALL = 1;
     private final int REQUEST_CODE = 20;
     private ImageView imageView1;
     private LatLng myLatLng;
+    private ImageView imageView;
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageRef = storage.getReference();
 
     int accidentType;
 
@@ -127,17 +153,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // db.collection("cities").document("new-city-id").set(data);
         // [END set_with_id]
     }
-	public void sendOnchannel1() {
 
-        Notification notification = new NotificationCompat.Builder(this, App.Channel_1_ID)
-                .setSmallIcon(R.drawable.ic_one)
-                .setContentTitle("Notification")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .build();
+    public void makePhoneCall(View v) {
+        String number = "911";
+        if (number.trim().length() > 0) {
 
-        notificationManager.notify(1, notification);
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CALL);
+            } else {
+                String dial = "tel:" + number;
+                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
+            }
+
+        } else {
+            Toast.makeText(this, "Enter phone number", Toast.LENGTH_SHORT).show();
+        }
     }
+
+
 
     public void getAllUsers() {
         // [START get_all_users]
@@ -190,6 +225,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
+    public void downloadImage(View view) throws ExecutionException, InterruptedException {
+
+        storageRef.child("data").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            String str = "";
+            ImageDownloader task = new ImageDownloader();
+            Bitmap myImage = null;
+            @Override
+            public void onSuccess(Uri uri) {
+                str += uri;
+                try {
+                    myImage = task.execute(str).get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                imageView.setImageBitmap(myImage);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -201,11 +264,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final EditText comment = findViewById(R.id.comment);
         final TextView locationText = findViewById(R.id.location);
         imageView1 = findViewById(R.id.imageView1);
-        notificationManager = NotificationManagerCompat.from(this);
-        sendOnchannel1();
+        imageView = (ImageView) findViewById(R.id.imageView4);
 
         Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(photoCaptureIntent, REQUEST_CODE);
+
 
         //add accident Types to spinner
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.accidentTypes, android.R.layout.simple_spinner_item);
@@ -293,8 +356,35 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 startActivity(intent);
             }
         });
+
+        //sendOnChannel1();
     }
 
+
+
+    public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+
+        // bitmap is for downloading images
+        @Override
+        protected Bitmap doInBackground(String... urls) {
+            Bitmap myBitmap = null;
+            try {
+                URL url = new URL(urls[0]);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream in = connection.getInputStream();
+
+                myBitmap = BitmapFactory.decodeStream(in);
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return myBitmap;
+        }
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -303,8 +393,30 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             Bitmap bitmap = (Bitmap)data.getExtras().get("data");
             imageView1.setImageBitmap(bitmap);
             Log.d(TAG, "IMAGE VIEW HERE");
-        }
+            StorageReference mountainsRef = storageRef.child("data");
+            // Get the data from an ImageView as bytes
+            imageView.setDrawingCacheEnabled(true);
+            imageView.buildDrawingCache();
+            Bitmap bitmap1 = ((BitmapDrawable) imageView1.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap1.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data1 = baos.toByteArray();
 
+            UploadTask uploadTask = mountainsRef.putBytes(data1);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    // ...
+                }
+            });
+
+        }
     }
 
     public static String getFirstChar(String s) {
