@@ -11,6 +11,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -87,9 +88,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = "Testing";
 
+    private double RADIUS = 5; // in miles
+
     LocationManager locationManager;
     private int i;
     private NotificationManagerCompat notificationManager;
+    String userId;
 
     LocationListener locationListener;
     Location currentLocation;
@@ -142,6 +146,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     zoomToCurrentLocation(lastLocation);
+                    currentLocation = lastLocation;
                 }
             }
         }
@@ -250,6 +255,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         switchView.setChecked(true);
 
+        userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
         accTypeStr = new HashMap<Integer, String>();
         accTypeStr.put(FIGHTING,"Fighting");
         accTypeStr.put(THEFT,"Theft");
@@ -350,6 +357,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // function to listen when database creates new document
     public void listenToMultiple() {
         db.collection("reports")
                 //.whereEqualTo("state", "CA")
@@ -363,24 +371,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
 
                         for (DocumentChange dc : value.getDocumentChanges()) {
-                            switch (dc.getType()) {
-                                case ADDED:
-                                    Log.d(TAG, "New city: " + dc.getDocument().getData());
-                                    Double lat = Double.parseDouble(dc.getDocument().get("latitude").toString());
-                                    Double lng = Double.parseDouble(dc.getDocument().get("longitude").toString());
-                                    Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
-                                            .setSmallIcon(R.drawable.ic_one)
-                                            .setContentTitle(dc.getDocument().get("type").toString())
-                                            .setContentText("dfdfdfdf")
-                                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                                            .build();
+                            if(i==1)
+                                switch (dc.getType()) {
+                                    case ADDED:
+                                        Double lat = Double.parseDouble(dc.getDocument().get("latitude").toString());
+                                        Double lng = Double.parseDouble(dc.getDocument().get("longitude").toString());
+                                        Integer type = Integer.parseInt(dc.getDocument().get("type").toString());
 
-                                    if(i == 1) {
-                                        notificationManager.notify(1,notification);
-                                    }
-                                    break;
-                            }
+                                        // Calculate for distance
+                                        Location reportLocation = new Location("report location");
+                                        reportLocation.setLatitude(lat);
+                                        reportLocation.setLongitude(lng);
+                                        double distance = Double.parseDouble(String.valueOf(currentLocation.distanceTo(reportLocation)))* 0.000621371; //in meters => miles
+                                        Log.d(TAG, "New city: " + distance);
+
+                                        // Will notify to user
+                                        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
+                                                .setSmallIcon(R.drawable.safe_beacon)
+                                                .setContentTitle(accTypeStr.get(type))
+                                                .setContentText("@ " + geoLocateByLatLng(new LatLng(lat,lng)).getAddressLine(0))
+                                                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                                                .build();
+
+                                        if(distance <= RADIUS && !userId.equals(dc.getDocument().get("userId")))
+                                            notificationManager.notify(1,notification);
+                                        break;
+                                }
                         }
 
                         List<Date> comment = new ArrayList<>();
@@ -561,6 +578,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(lastLocation != null) {
                 zoomToCurrentLocation(lastLocation);
+                currentLocation = lastLocation;
             }
         }
 

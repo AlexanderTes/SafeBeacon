@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spot.put("comment", comment);
         spot.put("city", city);
         spot.put("latitude", location.latitude);
-        spot.put("longtitude", location.longitude);
+        spot.put("longitude", location.longitude);
         spot.put("photo", photo);
         spot.put("time_stamp", time_stamp);
         spot.put("type", type);
