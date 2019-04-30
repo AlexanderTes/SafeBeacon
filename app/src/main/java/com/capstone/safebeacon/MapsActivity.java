@@ -100,6 +100,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     ArrayList<WeightedLatLng> weightedLatLngs = new ArrayList<>();
+    String HEAT_MAP = "police_reports";
+    String MARKER_MAP = "reports";
 
 //    private static final int CAMERA_REQUEST = 1888;
 //    private static final int MY_CAMERA_PERMISSION_CODE = 100;
@@ -141,7 +143,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void addMarkers(ArrayList<Report> reports) {
+    private void addHeatMap(ArrayList<WeightedLatLng> list) {
+        mMap.clear();
+        // Create the gradient.
+        int[] colors = {
+//                Color.rgb(102, 225, 0), // green
+//                Color.rgb(255, 0, 0)    // red
+                Color.GREEN,    // green
+                Color.YELLOW,    // yellow
+                Color.RED              //red
+        };
+
+        float[] startPoints = {
+                0.2f, 0.6f, 1f
+        };
+
+        Gradient gradient = new Gradient(colors, startPoints);
+
+        // Create a heat map tile provider, passing it the latlngs of the police reports.
+        mProvider = new HeatmapTileProvider.Builder()
+                .weightedData(list)
+                .gradient(gradient)
+                .build();
+        // Add a tile overlay to the map, using the heat map tile provider.
+        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+    }
+
+    public void addMarkers() {
+        mMap.clear();
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
         for (int i = 0; i < reports.size(); i++) {
             Report report = reports.get(i);
@@ -155,37 +184,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void loadNote() {
-        db.collection("police_reports")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()) {
-                            reports.clear();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                List<Double> group = (List<Double>) document.get("location");
-                                String id = document.getId();
-                                Double lat = Double.parseDouble(document.get("latitude").toString());
-                                Double lng = Double.parseDouble(document.get("longtitude").toString());
-                                Date time = document.getDate("time_stamp");
-                                Integer type = Integer.parseInt(document.get("type").toString());
-                                reports.add(new Report(id,new LatLng(lat,lng),time, type));
+    public void loadNote(String collectionName) {
+        if(collectionName.equals(HEAT_MAP)) {
+            db.collection(HEAT_MAP)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                weightedLatLngs.clear();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    //                                List<Double> group = (List<Double>) document.get("location");
+                                    String id = document.getId();
+                                    Double lat = Double.parseDouble(document.get("latitude").toString());
+                                    Double lng = Double.parseDouble(document.get("longitude").toString());
+                                    //                                Date time = document.getDate("time_stamp");
+                                    Integer type = Integer.parseInt(document.get("type").toString());
 
-                                weightedLatLngs.add(new WeightedLatLng(new LatLng(lat,lng),type*WEIGHT_NUMBER));
+                                    weightedLatLngs.add(new WeightedLatLng(new LatLng(lat, lng), type * WEIGHT_NUMBER));
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting document: ", task.getException());
+
                             }
-                        } else {
-                            Log.d(TAG, "Error getting document: ", task.getException());
-
-                        }
-                        mMap.clear();
-                        if(switchView.isChecked())
-                            addMarkers(reports);
-                        else
                             addHeatMap(weightedLatLngs);
-                        Log.d(TAG, "LoadNote-inloop: " + reports.size());
-                    }
-                });
+                        }
+                    });
+        } else {
+            db.collection(MARKER_MAP)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                reports.clear();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    String id = document.getId();
+                                    Double lat = Double.parseDouble(document.get("latitude").toString());
+                                    Double lng = Double.parseDouble(document.get("longitude").toString());
+                                    Date time = document.getDate("time_stamp");
+                                    Integer type = Integer.parseInt(document.get("type").toString());
+                                    reports.add(new Report(id, new LatLng(lat, lng), time, type));
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting document: ", task.getException());
+
+                            }
+                            addMarkers();
+                        }
+                    });
+        }
     }
 
     @Override
@@ -220,8 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        loadNote();
-        Log.d(TAG, "LoadNote: " + reports.size());
+        loadNote(MARKER_MAP);
 
         init();
 
@@ -231,11 +278,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
+                    loadNote(MARKER_MAP);
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
+                    loadNote(HEAT_MAP);
                 }
-                loadNote();
+
             }
         });
 
@@ -304,6 +353,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public boolean isContainedId(String id){
+        for (int i = 0; i < reports.size(); i++){
+            if(id.equals(reports.get(i).getReportID()))
+                return true;
+        }
+        return false;
+    }
+
     // function to listen when database creates new document
     public void listenToMultiple() {
         db.collection("reports")
@@ -321,16 +378,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if(i==1)
                                 switch (dc.getType()) {
                                     case ADDED:
+                                        String id = dc.getDocument().getId();
                                         Double lat = Double.parseDouble(dc.getDocument().get("latitude").toString());
                                         Double lng = Double.parseDouble(dc.getDocument().get("longitude").toString());
                                         Integer type = Integer.parseInt(dc.getDocument().get("type").toString());
+                                        if(!isContainedId(id)){
+                                            reports.add(new Report(id,new LatLng(lat,lng),dc.getDocument().getDate("time_stamp"),type));
+                                            Log.d(TAG, "New city: " + id);
+                                        }
 
                                         // Calculate for distance
                                         Location reportLocation = new Location("report location");
                                         reportLocation.setLatitude(lat);
                                         reportLocation.setLongitude(lng);
                                         double distance = Double.parseDouble(String.valueOf(currentLocation.distanceTo(reportLocation)))* 0.000621371; //in meters => miles
-                                        Log.d(TAG, "New city: " + distance);
 
                                         // Will notify to user
                                         Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
@@ -346,6 +407,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         break;
                                 }
                         }
+                        Log.d(TAG, "New city "+reports.size());
+                        addMarkers();
 
                         List<Date> comment = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
@@ -386,33 +449,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return null;
     }
-
-    private void addHeatMap(ArrayList<WeightedLatLng> list) {
-        // Create the gradient.
-        int[] colors = {
-//                Color.rgb(102, 225, 0), // green
-//                Color.rgb(255, 0, 0)    // red
-                Color.GREEN,    // green
-                Color.YELLOW,    // yellow
-                Color.RED              //red
-        };
-
-        float[] startPoints = {
-                0.2f, 0.6f, 1f
-        };
-
-        Gradient gradient = new Gradient(colors, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police reports.
-        mProvider = new HeatmapTileProvider.Builder()
-                .weightedData(list)
-                .gradient(gradient)
-                .build();
-        // Add a tile overlay to the map, using the heat map tile provider.
-        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
-    }
-
-
 
     /**
      * Manipulates the map once available.

@@ -6,19 +6,17 @@
     </shared>
   </component>
   <component name="AndroidLogFilters">
-    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="Current cites in CA" />
     <option name="TOOL_WINDOW_LOG_LEVEL" value="debug" />
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="24706a5f-666f-43d7-b45c-a1c0e5418284" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/CustomInfoWindowAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Incidents.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/info_window.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MapsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MapsActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/info_window.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/info_window.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -80,10 +78,10 @@
         <counts>
           <entry key="class" value="8" />
           <entry key="gradle" value="9" />
-          <entry key="java" value="21" />
+          <entry key="java" value="22" />
           <entry key="json" value="2" />
           <entry key="png" value="22" />
-          <entry key="xml" value="57" />
+          <entry key="xml" value="60" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -91,26 +89,26 @@
           <entry key="CLASS" value="8" />
           <entry key="Groovy" value="9" />
           <entry key="Image" value="22" />
-          <entry key="JAVA" value="21" />
+          <entry key="JAVA" value="22" />
           <entry key="JSON" value="2" />
-          <entry key="XML" value="57" />
+          <entry key="XML" value="60" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="16" />
           <entry key="gradle" value="142" />
-          <entry key="java" value="13695" />
+          <entry key="java" value="14857" />
           <entry key="txt" value="175" />
-          <entry key="xml" value="2315" />
+          <entry key="xml" value="2621" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Groovy" value="142" />
-          <entry key="JAVA" value="13695" />
+          <entry key="JAVA" value="14857" />
           <entry key="PLAIN_TEXT" value="191" />
-          <entry key="XML" value="2315" />
+          <entry key="XML" value="2621" />
         </counts>
       </usages-collector>
     </session>
@@ -120,8 +118,18 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="55" column="61" selection-start-line="55" selection-start-column="61" selection-end-line="55" selection-end-column="61" />
+            <state relative-caret-position="285">
+              <caret line="63" column="28" lean-forward="true" selection-start-line="63" selection-start-column="28" selection-end-line="63" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+          <provider editor-type-id="android-manifest" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="196">
+              <caret line="26" column="46" selection-start-line="26" selection-start-column="46" selection-end-line="26" selection-end-column="46" />
             </state>
           </provider>
         </entry>
@@ -130,8 +138,8 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
           <provider editor-type-id="android-designer2" />
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="29" column="44" selection-start-line="29" selection-start-column="44" selection-end-line="29" selection-end-column="44" />
+            <state relative-caret-position="75">
+              <caret line="5" column="34" selection-start-line="5" selection-start-column="34" selection-end-line="5" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -139,11 +147,27 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MapsActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2867">
-              <caret line="114" column="108" selection-start-line="114" selection-start-column="108" selection-end-line="114" selection-end-column="108" />
+            <state relative-caret-position="-1547">
+              <caret line="251" lean-forward="true" selection-start-line="251" selection-end-line="251" />
               <folding>
-                <element signature="e#14901#18685#0" expanded="true" />
-                <element signature="e#18684#18685#0" expanded="true" />
+                <element signature="e#7192#8615#0" expanded="true" />
+                <element signature="e#8614#8615#0" expanded="true" />
+                <element signature="e#8742#9947#0" expanded="true" />
+                <element signature="e#9946#9947#0" expanded="true" />
+                <element signature="e#14793#19217#0" expanded="true" />
+                <element signature="e#19216#19217#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="98">
+              <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -153,36 +177,8 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/info_window.xml">
           <provider editor-type-id="android-designer2" />
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="524">
-              <caret line="35" column="35" selection-start-line="35" selection-start-column="35" selection-end-line="35" selection-end-column="35" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/CustomInfoWindowAdapter.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="595">
-              <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1078#1079#0" expanded="true" />
-                <element signature="e#1105#1106#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97">
-              <caret line="14" column="63" selection-start-line="14" selection-start-column="63" selection-end-line="14" selection-end-column="63" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#749#750#0" expanded="true" />
-                <element signature="e#796#797#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="575">
+              <caret line="42" column="38" selection-start-line="35" selection-start-column="8" selection-end-line="42" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -219,9 +215,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>update</find>
-      <find>zoomToCurrentLocation</find>
-      <find>loadN</find>
       <find>ArrayList</find>
       <find>reports</find>
       <find>heat</find>
@@ -240,15 +233,18 @@
       <find>userId</find>
       <find>distance</find>
       <find>934807</find>
-      <find>last</find>
       <find>typeToIncident</find>
       <find>FIGHTING</find>
       <find>loadNo</find>
       <find>onMap</find>
       <find>addMarker</find>
-      <find>addMarkers</find>
       <find>move</find>
       <find>moveCam</find>
+      <find>last</find>
+      <find>addMarkers</find>
+      <find>new city</find>
+      <find>UserId</find>
+      <find>reports.add</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -270,25 +266,25 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Reports.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/PlaceAutocompleteAdapter.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Notification.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/NotificationChannel.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Incident.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Incidents.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/info_window.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/InfoWindowAdapter.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/CustomInfoWindowAdapter.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/info_window.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MapsActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="48" />
     <option name="y" value="23" />
-    <option name="width" value="1248" />
+    <option name="width" value="1237" />
     <option name="height" value="877" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -340,7 +336,7 @@
               <item name="SafeBeacon" type="1abcf292:AndroidViewProjectNode" />
               <item name="app" type="feadf853:AndroidModuleNode" />
               <item name="res" type="d4f16f75:AndroidResFolderNode" />
-              <item name="layout" type="ddeffd01:AndroidResFolderTypeNode" />
+              <item name="drawable" type="ddeffd01:AndroidResFolderTypeNode" />
             </path>
             <path>
               <item name="SafeBeacon" type="1abcf292:AndroidViewProjectNode" />
@@ -631,8 +627,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="48" y="23" width="1248" height="877" extended-state="0" />
-    <editor active="true" />
+    <frame x="48" y="23" width="1237" height="877" extended-state="0" />
     <layout>
       <window_info id="Captures" order="0" side_tool="true" weight="0.25" />
       <window_info id="Structure" order="1" side_tool="true" />
@@ -641,9 +636,9 @@
       <window_info id="Image Layers" order="4" />
       <window_info id="Designer" order="5" />
       <window_info id="Capture Tool" order="6" />
-      <window_info content_ui="combo" id="Project" order="7" weight="0.3076285" />
+      <window_info active="true" content_ui="combo" id="Project" order="7" visible="true" weight="0.19665273" />
       <window_info anchor="bottom" id="Run" order="0" sideWeight="0.48756218" weight="0.32939634" />
-      <window_info active="true" anchor="bottom" id="Logcat" order="1" sideWeight="0.4859038" visible="true" weight="0.4081365" />
+      <window_info anchor="bottom" id="Logcat" order="1" sideWeight="0.4859038" weight="0.4081365" />
       <window_info anchor="bottom" id="TODO" order="2" sideWeight="0.49697885" weight="0.32939634" />
       <window_info anchor="bottom" id="Debug" order="3" />
       <window_info anchor="bottom" id="Terminal" order="4" sideWeight="0.4954683" weight="0.32939634" />
@@ -837,14 +832,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="44" selection-start-line="29" selection-start-column="44" selection-end-line="29" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable-v24/ic_launcher_foreground.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -853,14 +840,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png">
       <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
-      <provider editor-type-id="android-manifest" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="141">
-          <caret line="21" column="41" selection-start-line="21" selection-start-column="30" selection-end-line="21" selection-end-column="41" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml">
       <provider selected="true" editor-type-id="text-editor" />
@@ -890,26 +869,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/info_window.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="524">
-          <caret line="35" column="35" selection-start-line="35" selection-start-column="35" selection-end-line="35" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/CustomInfoWindowAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="595">
-          <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1078#1079#0" expanded="true" />
-            <element signature="e#1105#1106#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/firebase-firestore-18.2.0.aar/20a368dff909537df74f09770dd3ff10/jars/classes.jar!/com/google/firebase/firestore/DocumentSnapshot.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="137">
@@ -917,10 +876,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java">
+    <entry file="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/play-services-maps-16.1.0.aar/dd68eee18da346bcafd43b921b7cd61e/jars/classes.jar!/com/google/android/gms/maps/GoogleMap.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="55" column="61" selection-start-line="55" selection-start-column="61" selection-end-line="55" selection-end-column="61" />
+        <state relative-caret-position="142">
+          <caret line="97" column="22" selection-start-line="97" selection-start-column="22" selection-end-line="97" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/CustomInfoWindowAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="675">
+          <caret line="45" column="23" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1078#1079#0" expanded="true" />
+            <element signature="e#1105#1106#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -942,30 +913,56 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/Report.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="14" column="63" selection-start-line="14" selection-start-column="63" selection-end-line="14" selection-end-column="63" />
+        <state relative-caret-position="98">
+          <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#749#750#0" expanded="true" />
-            <element signature="e#796#797#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/play-services-maps-16.1.0.aar/dd68eee18da346bcafd43b921b7cd61e/jars/classes.jar!/com/google/android/gms/maps/GoogleMap.class">
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/info_window.xml">
+      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="97" column="22" selection-start-line="97" selection-start-column="22" selection-end-line="97" selection-end-column="22" />
+        <state relative-caret-position="575">
+          <caret line="42" column="38" selection-start-line="35" selection-start-column="8" selection-end-line="42" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider editor-type-id="android-manifest" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="26" column="46" selection-start-line="26" selection-start-column="46" selection-end-line="26" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+      <provider editor-type-id="android-designer2" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="34" selection-start-line="5" selection-start-column="34" selection-end-line="5" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="63" column="28" lean-forward="true" selection-start-line="63" selection-start-column="28" selection-end-line="63" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/capstone/safebeacon/MapsActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2867">
-          <caret line="114" column="108" selection-start-line="114" selection-start-column="108" selection-end-line="114" selection-end-column="108" />
+        <state relative-caret-position="-1547">
+          <caret line="251" lean-forward="true" selection-start-line="251" selection-end-line="251" />
           <folding>
-            <element signature="e#14901#18685#0" expanded="true" />
-            <element signature="e#18684#18685#0" expanded="true" />
+            <element signature="e#7192#8615#0" expanded="true" />
+            <element signature="e#8614#8615#0" expanded="true" />
+            <element signature="e#8742#9947#0" expanded="true" />
+            <element signature="e#9946#9947#0" expanded="true" />
+            <element signature="e#14793#19217#0" expanded="true" />
+            <element signature="e#19216#19217#0" expanded="true" />
           </folding>
         </state>
       </provider>
