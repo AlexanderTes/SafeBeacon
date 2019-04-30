@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -69,22 +70,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<Report> reports = new ArrayList<>();
 
-    private int FIGHTING = 1;
-    private int THEFT = 2;
-    private int BURGLAR = 3;
-    private int MINOR_ACCIDENT = 4;
-    private int SEVERE_ACCIDENT = 5;
-    private int CRIME = 6;
+    Incidents.IncidentType incidentType = new Incidents.IncidentType();
     private int WEIGHT_NUMBER = 20;
 
-    HashMap<Integer, String> accTypeStr;
-
-    BitmapDescriptor fightingBitmap;
-    BitmapDescriptor burglarBitmap;
-    BitmapDescriptor theftBitmap;
-    BitmapDescriptor crimeBitmap;
-    BitmapDescriptor minorAccidentBitmap;
-    BitmapDescriptor severeAccidentBitmap;
+    HashMap<Integer, Incidents.Incident> typeToIncident;
 
     private static final String TAG = "Testing";
 
@@ -150,60 +139,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }
-//        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-//        {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//            {
-//                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-//                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-//            }
-//            else
-//            {
-//                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//        protected void onActivityResult(int requestCode, int resultCode, Intent data)
-//        {
-//            if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
-//            {
-//                Bitmap photo = (Bitmap) data.getExtras().get("data");
-//                imageView.setImageBitmap(photo);
-//            }
-//        }
-
     }
 
-    public void addMarker(ArrayList<Report> reports) {
+    public void addMarkers(ArrayList<Report> reports) {
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
         for (int i = 0; i < reports.size(); i++) {
             Report report = reports.get(i);
-            if (report.getAccidentType() == FIGHTING) {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(FIGHTING) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(fightingBitmap));
-            } else if (report.getAccidentType() == THEFT) {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(THEFT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(theftBitmap));
-            } else if (report.getAccidentType() == BURGLAR) {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(BURGLAR) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(burglarBitmap));
-            } else if (report.getAccidentType() == MINOR_ACCIDENT) {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(MINOR_ACCIDENT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(minorAccidentBitmap));
-            } else if (report.getAccidentType() == SEVERE_ACCIDENT) {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(SEVERE_ACCIDENT) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(severeAccidentBitmap));
-            } else {
-                mMap.addMarker(new MarkerOptions().position(report.getLatLng())
-                        .title(accTypeStr.get(CRIME) + "\nDate: " + report.getTimeStamp() + "\n" + geoLocateByLatLng(report.getLatLng()).toString())
-                        .icon(crimeBitmap));
-            }
+            String snippet = report.getStringDate() + "\n" +
+                    "@ " + geoLocateByLatLng(report.getLatLng()).getAddressLine(0);
+
+            mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                    .title(typeToIncident.get(report.getIncidentType()).getName())
+                    .snippet(snippet)
+                    .icon(typeToIncident.get(report.getIncidentType()).getIcon()));
         }
-        Log.d(TAG,"AddMarkers");
     }
 
     public void loadNote() {
@@ -219,13 +168,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 String id = document.getId();
                                 Double lat = Double.parseDouble(document.get("latitude").toString());
                                 Double lng = Double.parseDouble(document.get("longtitude").toString());
-                                String time = document.get("time_stamp").toString();
+                                Date time = document.getDate("time_stamp");
                                 Integer type = Integer.parseInt(document.get("type").toString());
                                 reports.add(new Report(id,new LatLng(lat,lng),time, type));
 
                                 weightedLatLngs.add(new WeightedLatLng(new LatLng(lat,lng),type*WEIGHT_NUMBER));
-
-//                                Log.d(TAG, "LoadNote: " + reports.size());
                             }
                         } else {
                             Log.d(TAG, "Error getting document: ", task.getException());
@@ -233,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                         mMap.clear();
                         if(switchView.isChecked())
-                            addMarker(reports);
+                            addMarkers(reports);
                         else
                             addHeatMap(weightedLatLngs);
                         Log.d(TAG, "LoadNote-inloop: " + reports.size());
@@ -257,13 +204,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        accTypeStr = new HashMap<Integer, String>();
-        accTypeStr.put(FIGHTING,"Fighting");
-        accTypeStr.put(THEFT,"Theft");
-        accTypeStr.put(BURGLAR,"Burglar");
-        accTypeStr.put(MINOR_ACCIDENT,"Minor Accident");
-        accTypeStr.put(SEVERE_ACCIDENT,"Severe Accident");
-        accTypeStr.put(CRIME,"Crime");
+        typeToIncident = new HashMap<Integer, Incidents.Incident>();
+        typeToIncident.put(incidentType.FIGHTING,new Incidents.Incident(incidentType.FIGHTING));
+        typeToIncident.put(incidentType.THEFT,new Incidents.Incident(incidentType.THEFT));
+        typeToIncident.put(incidentType.BURGLAR,new Incidents.Incident(incidentType.BURGLAR));
+        typeToIncident.put(incidentType.MINOR_ACCIDENT,new Incidents.Incident(incidentType.MINOR_ACCIDENT));
+        typeToIncident.put(incidentType.SEVERE_ACCIDENT,new Incidents.Incident(incidentType.SEVERE_ACCIDENT));
+        typeToIncident.put(incidentType.CRIME,new Incidents.Incident(incidentType.CRIME));
 
         listenToMultiple();
         notificationManager = NotificationManagerCompat.from(this);
@@ -388,7 +335,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         // Will notify to user
                                         Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
                                                 .setSmallIcon(R.drawable.safe_beacon)
-                                                .setContentTitle(accTypeStr.get(type))
+                                                .setContentTitle(typeToIncident.get(type).getName())
                                                 .setContentText("@ " + geoLocateByLatLng(new LatLng(lat,lng)).getAddressLine(0))
                                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
@@ -521,14 +468,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        fightingBitmap = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
-        burglarBitmap = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
-        theftBitmap = BitmapDescriptorFactory.fromResource(R.drawable.theft);
-        crimeBitmap = BitmapDescriptorFactory.fromResource(R.drawable.crime);
-        minorAccidentBitmap = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
-        severeAccidentBitmap = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
-        myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
 
         ArrayList<LatLng> latLngs = new ArrayList<>();
 

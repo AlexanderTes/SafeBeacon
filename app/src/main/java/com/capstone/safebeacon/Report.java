@@ -2,19 +2,21 @@ package com.capstone.safebeacon;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Date;
+
 public class Report {
     private String reportID;
     private LatLng latLng;
-    private String timeStamp;
-    private Integer accidentType;
+    private Date timeStamp;
+    private Integer incidentType;
 
     public Report(){}
 
-    public Report(String id, LatLng ltlg, String time, int type){
+    public Report(String id, LatLng ltlg, Date time, int type){
         reportID = id;
         latLng = ltlg;
         timeStamp = time;
-        accidentType = type;
+        incidentType = type;
     }
 
     public String getReportID() {
@@ -25,12 +27,15 @@ public class Report {
         return latLng;
     }
 
-    public String getTimeStamp() {
+    public Date getTimeStamp() {
         return timeStamp;
     }
 
-    public Integer getAccidentType() {
-        return accidentType;
+    public Integer getIncidentType() {
+        return incidentType;
     }
 
+    public String getStringDate() {
+        return this.timeStamp.toString();
+    }
 }

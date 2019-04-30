@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private static final int LENGTH_OF_REPORT_ID = 20;
     private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
+    private String TIME_FORMAT_FOR_DATE = "MM/dd/yyyy HH:mm z";
 
     private final int REQUEST_IMAGE_CAPTURE_CODE = 100;
     private ImageView imageView1;
