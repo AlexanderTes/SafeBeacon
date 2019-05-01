@@ -1,18 +1,24 @@
 package com.capstone.safebeacon;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,7 +30,6 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,32 +38,56 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.maps.android.heatmaps.Gradient;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    HeatmapTileProvider mProvider;
+    private TileOverlay mOverlay;
+
+    ArrayList<Report> reports = new ArrayList<>();
+
+    Incidents.IncidentType incidentType = new Incidents.IncidentType();
+    private int WEIGHT_NUMBER = 20;
+
+    HashMap<Integer, Incidents.Incident> typeToIncident;
+
     private static final String TAG = "Testing";
 
+    private double RADIUS = 5; // in miles
+
     LocationManager locationManager;
+    private int i;
+    private NotificationManagerCompat notificationManager;
+    String userId;
 
     LocationListener locationListener;
+    Location currentLocation;
+
+    private Marker currLocMarker;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -69,16 +98,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Switch switchView;
     BitmapDescriptor myLocationIC;
 
+
+    ArrayList<WeightedLatLng> weightedLatLngs = new ArrayList<>();
+    String HEAT_MAP = "police_reports";
+    String MARKER_MAP = "reports";
+
 //    private static final int CAMERA_REQUEST = 1888;
 //    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
 
-    public void updateMap(Location location) {
-        mMap.clear();
+    public void zoomToCurrentLocation(Location location) {
+
+        if(currLocMarker != null) { //Check if the marker is null
+            currLocMarker.remove();
+        }
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
+        Marker marker = mMap.addMarker(new MarkerOptions().position(userLocation).title("My Location").icon(myLocationIC));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,14));
+
+        currLocMarker = marker;
+    }
+
+    public void moveToLocation(Location location, int zoom){
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(userLocation));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,zoom));
     }
 
     @Override
@@ -91,89 +136,104 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
                     Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    updateMap(lastLocation);
+                    zoomToCurrentLocation(lastLocation);
+                    currentLocation = lastLocation;
                 }
             }
         }
-//        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-//        {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//            {
-//                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-//                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-//            }
-//            else
-//            {
-//                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//        protected void onActivityResult(int requestCode, int resultCode, Intent data)
-//        {
-//            if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
-//            {
-//                Bitmap photo = (Bitmap) data.getExtras().get("data");
-//                imageView.setImageBitmap(photo);
-//            }
-//        }
-
     }
 
-    public void loadNote(Location location) {
+    private void addHeatMap(ArrayList<WeightedLatLng> list) {
+        mMap.clear();
+        // Create the gradient.
+        int[] colors = {
+//                Color.rgb(102, 225, 0), // green
+//                Color.rgb(255, 0, 0)    // red
+                Color.GREEN,    // green
+                Color.YELLOW,    // yellow
+                Color.RED              //red
+        };
 
-        Geocoder geocoder = new Geocoder(MapsActivity.this);
-        List<Address> addressList = new ArrayList<>();
-        String city = "";
+        float[] startPoints = {
+                0.2f, 0.6f, 1f
+        };
 
-        try {
-            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-        } catch (IOException e) {
-            Log.e(TAG, "geoLocate: IOException:" + e.getMessage());
+        Gradient gradient = new Gradient(colors, startPoints);
+
+        // Create a heat map tile provider, passing it the latlngs of the police reports.
+        mProvider = new HeatmapTileProvider.Builder()
+                .weightedData(list)
+                .gradient(gradient)
+                .build();
+        // Add a tile overlay to the map, using the heat map tile provider.
+        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+    }
+
+    public void addMarkers() {
+        mMap.clear();
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+        for (int i = 0; i < reports.size(); i++) {
+            Report report = reports.get(i);
+            String snippet = report.getStringDate() + "\n" +
+                    "@ " + geoLocateByLatLng(report.getLatLng()).getAddressLine(0);
+
+            mMap.addMarker(new MarkerOptions().position(report.getLatLng())
+                    .title(typeToIncident.get(report.getIncidentType()).getName())
+                    .snippet(snippet)
+                    .icon(typeToIncident.get(report.getIncidentType()).getIcon()));
         }
+    }
 
-        if (addressList.size() > 0) {
-            Address address = addressList.get(0);
-            city = address.getLocality();
-        }
-        db.collection("reports")
-                .whereEqualTo("city",city)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "Load Note: " + document.getId() + " => " + document.getData());
+    public void loadNote(String collectionName) {
+        if(collectionName.equals(HEAT_MAP)) {
+            db.collection(HEAT_MAP)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                weightedLatLngs.clear();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    //                                List<Double> group = (List<Double>) document.get("location");
+                                    String id = document.getId();
+                                    Double lat = Double.parseDouble(document.get("latitude").toString());
+                                    Double lng = Double.parseDouble(document.get("longitude").toString());
+                                    //                                Date time = document.getDate("time_stamp");
+                                    Integer type = Integer.parseInt(document.get("type").toString());
+
+                                    weightedLatLngs.add(new WeightedLatLng(new LatLng(lat, lng), type * WEIGHT_NUMBER));
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting document: ", task.getException());
+
                             }
-                        } else {
-                            Log.d(TAG, "Error getting document: ", task.getException());
-
+                            addHeatMap(weightedLatLngs);
                         }
-                    }
-                });
-//                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-//
-//                        if(documentSnapshot.exists()) {
-////                            String comment = documentSnapshot.getString("comment");
-////                            String locationSTr = documentSnapshot.getString("location");
-//
-////                            Log.d(TAG, "Location: " + locationSTr);
-//
-//                            Map<String, Object> note = documentSnapshot.getData();
-//                            Log.d(TAG,"Load Note: " + note.toString());
-//                        }
-//                        else
-//                            Toast.makeText(MapsActivity.this,"Document does not exist",Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//
-//                    }
-//                });
+                    });
+        } else {
+            db.collection(MARKER_MAP)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                reports.clear();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    String id = document.getId();
+                                    Double lat = Double.parseDouble(document.get("latitude").toString());
+                                    Double lng = Double.parseDouble(document.get("longitude").toString());
+                                    Date time = document.getDate("time_stamp");
+                                    Integer type = Integer.parseInt(document.get("type").toString());
+                                    reports.add(new Report(id, new LatLng(lat, lng), time, type));
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting document: ", task.getException());
+
+                            }
+                            addMarkers();
+                        }
+                    });
+        }
     }
 
     @Override
@@ -183,18 +243,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         searchText = findViewById(R.id.input_search);
         switchView = findViewById(R.id.switchView);
+        final ImageButton currLocButton = findViewById(R.id.currLocButton);
 
         final RelativeLayout reLay2 = findViewById(R.id.relativeLayout2);
         final ImageButton photoButton = findViewById(R.id.photoButton);
 
         switchView.setChecked(true);
 
+        userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        typeToIncident = new HashMap<Integer, Incidents.Incident>();
+        typeToIncident.put(incidentType.FIGHTING,new Incidents.Incident(incidentType.FIGHTING));
+        typeToIncident.put(incidentType.THEFT,new Incidents.Incident(incidentType.THEFT));
+        typeToIncident.put(incidentType.BURGLAR,new Incidents.Incident(incidentType.BURGLAR));
+        typeToIncident.put(incidentType.MINOR_ACCIDENT,new Incidents.Incident(incidentType.MINOR_ACCIDENT));
+        typeToIncident.put(incidentType.SEVERE_ACCIDENT,new Incidents.Incident(incidentType.SEVERE_ACCIDENT));
+        typeToIncident.put(incidentType.CRIME,new Incidents.Incident(incidentType.CRIME));
+
+        listenToMultiple();
+        notificationManager = NotificationManagerCompat.from(this);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        loadNote("Duckwater"); // Testing
+        loadNote(MARKER_MAP);
 
         init();
 
@@ -204,15 +278,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (b) {
                     reLay2.setVisibility(View.INVISIBLE);
                     photoButton.setVisibility(View.VISIBLE);
-
-                    mMap.getUiSettings().setZoomControlsEnabled(false);
-
+                    loadNote(MARKER_MAP);
                 } else {
                     reLay2.setVisibility(View.VISIBLE);
                     photoButton.setVisibility(View.INVISIBLE);
-
-                    mMap.getUiSettings().setZoomControlsEnabled(true);
+                    loadNote(HEAT_MAP);
                 }
+
             }
         });
 
@@ -223,15 +295,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
 
                 startActivity(intent);
-//                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-//                {
-//                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-//                }
-//                else
-//                {
-//                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
-//                }
+            }
+        });
+
+        currLocButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                zoomToCurrentLocation(currentLocation);
             }
         });
 
@@ -283,6 +353,102 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public boolean isContainedId(String id){
+        for (int i = 0; i < reports.size(); i++){
+            if(id.equals(reports.get(i).getReportID()))
+                return true;
+        }
+        return false;
+    }
+
+    // function to listen when database creates new document
+    public void listenToMultiple() {
+        db.collection("reports")
+                //.whereEqualTo("state", "CA")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            if(i==1)
+                                switch (dc.getType()) {
+                                    case ADDED:
+                                        String id = dc.getDocument().getId();
+                                        Double lat = Double.parseDouble(dc.getDocument().get("latitude").toString());
+                                        Double lng = Double.parseDouble(dc.getDocument().get("longitude").toString());
+                                        Integer type = Integer.parseInt(dc.getDocument().get("type").toString());
+                                        if(!isContainedId(id)){
+                                            reports.add(new Report(id,new LatLng(lat,lng),dc.getDocument().getDate("time_stamp"),type));
+                                            Log.d(TAG, "New city: " + id);
+                                        }
+
+                                        // Calculate for distance
+                                        Location reportLocation = new Location("report location");
+                                        reportLocation.setLatitude(lat);
+                                        reportLocation.setLongitude(lng);
+                                        double distance = Double.parseDouble(String.valueOf(currentLocation.distanceTo(reportLocation)))* 0.000621371; //in meters => miles
+
+                                        // Will notify to user
+                                        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
+                                                .setSmallIcon(R.drawable.safe_beacon)
+                                                .setContentTitle(typeToIncident.get(type).getName())
+                                                .setContentText("@ " + geoLocateByLatLng(new LatLng(lat,lng)).getAddressLine(0))
+                                                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                                                .build();
+
+                                        if(distance <= RADIUS && !userId.equals(dc.getDocument().get("userId")))
+                                            notificationManager.notify(1,notification);
+                                        break;
+                                }
+                        }
+                        Log.d(TAG, "New city "+reports.size());
+                        addMarkers();
+
+                        List<Date> comment = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get("time_stamp") != null) {
+                                comment.add(doc.getDate("time_stamp"));
+                                Log.d(TAG, "Current cites in CA: " + comment);
+
+//                                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NotificationChannel.Channel_1_ID)
+//                                        .setSmallIcon(R.drawable.ic_one)
+//                                        .setContentTitle("NotificationChannel")
+//                                        .setContentText("Report is submitted or deleted")
+//                                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+//                                        .build();
+//
+//                                if(i == 1) {
+//                                    notificationManager.notify(1,notification);
+//                                }
+                            }
+                        }
+                        i = 1;
+                    }
+                });
+    }
+
+    public Address geoLocateByLatLng(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(MapsActivity.this);
+        List<Address> addressList = new ArrayList<>();
+
+        try {
+            addressList = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1);
+        } catch (IOException e) {
+            Log.e(TAG, "geoLocateByLatLng: IOException:" + e.getMessage());
+        }
+
+        if (addressList.size() > 0) {
+            return addressList.get(0);
+        }
+        return null;
+    }
 
     /**
      * Manipulates the map once available.
@@ -293,19 +459,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+//    protected String getRandomString(int length_of_string) {
+//        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+//        StringBuilder salt = new StringBuilder();
+//        Random rnd = new Random();
+//        while (salt.length() < length_of_string) { // length of the random string.
+//            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+//            salt.append(SALTCHARS.charAt(index));
+//        }
+//        String saltStr = salt.toString();
+//        return saltStr;
+//    }
+//
+//    private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
+//    public String parseTime(Date date, String format){
+//        SimpleDateFormat output = new SimpleDateFormat(format);
+//        return output.format(date);
+//    }
+//    CollectionReference policeReportRef = db.collection("police_reports");
+//    public void setPoliceReport(String doc_name, LatLng location, Date time_stamp, int type) {
+//        // [START set_document]
+//        Map<String, Object> spot = new HashMap<>();
+//        spot.put("latitude", location.latitude);
+//        spot.put("longtitude", location.longitude);
+//        spot.put("time_stamp", time_stamp);
+//        spot.put("type", type);
+//
+//        policeReportRef.document(doc_name)
+//                .set(spot)
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.w(TAG, "Error writing document", e);
+//                    }
+//                });
+//    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        BitmapDescriptor fighting = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
-        BitmapDescriptor burglar = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
-        BitmapDescriptor theft = BitmapDescriptorFactory.fromResource(R.drawable.theft);
-        BitmapDescriptor crime = BitmapDescriptorFactory.fromResource(R.drawable.crime);
-        BitmapDescriptor minorAccident = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
-        BitmapDescriptor severeAccident = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
-        myLocationIC = BitmapDescriptorFactory.fromResource(R.drawable.mylocation);
-
         ArrayList<LatLng> latLngs = new ArrayList<>();
+
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -313,9 +515,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onLocationChanged(Location location) {
 
-                if(switchView.isChecked())
-                    updateMap(location);
-                loadNote(location);
+//                if(switchView.isChecked())
+//                    zoomToCurrentLocation(location);
+                currentLocation = location;
+
             }
 
             @Override
@@ -349,51 +552,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(lastLocation != null) {
-                updateMap(lastLocation);
+                zoomToCurrentLocation(lastLocation);
+                currentLocation = lastLocation;
             }
         }
-
-
-        latLngs.add(new LatLng(33.556242, -101.801492));
-        latLngs.add(new LatLng(33.541580, -101.900734));
-        latLngs.add(new LatLng(33.573734, -101.926059));
-        latLngs.add(new LatLng(33.605888, -101.870524));
-        latLngs.add(new LatLng(33.591225, -101.814989));
-        latLngs.add(new LatLng(33.533765, -101.840314));
-        latLngs.add(new LatLng(33.608716, -101.939556));
-        latLngs.add(new LatLng(33.551256, -101.884021));
-        latLngs.add(new LatLng(33.583410, -101.909346));
-        latLngs.add(new LatLng(33.568747, -101.853811));
-        latLngs.add(new LatLng(33.600901, -101.879136));
-        latLngs.add(new LatLng(33.543441, -101.823601));
-        latLngs.add(new LatLng(33.528779, -101.922843));
-        latLngs.add(new LatLng(33.560933, -101.793391));
-        latLngs.add(new LatLng(33.546270, -101.892633));
-        latLngs.add(new LatLng(33.578424, -101.837099));
-        latLngs.add(new LatLng(33.610578, -101.862423));
-        latLngs.add(new LatLng(33.595915, -101.806888));
-        latLngs.add(new LatLng(33.538455, -101.832213));
-        latLngs.add(new LatLng(33.570609, -101.931455));
-
-
-        for (int i = 0; i < latLngs.size(); i++) {
-            if (i % 6 == 1) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Theft " + i).icon(theft));
-            } else if (i % 6 == 2) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Fighting " + i).icon(fighting));
-            } else if (i % 6 == 3) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Burglar " + i).icon(burglar));
-            } else if (i % 6 == 4) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: Suspect " + i).icon(crime));
-            } else if (i % 6 == 5) {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: minor Accident " + i).icon(minorAccident));
-            } else {
-                mMap.addMarker(new MarkerOptions().position(latLngs.get(i)).title("Marker: severe Accident " + i).icon(severeAccident));
-            }
-        }
-
-
-//        mMap2.setMyLocationEnabled(true);
 
     }
 

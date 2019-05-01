@@ -9,14 +9,38 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#0F5161"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="169dp">
+        tools:layout_editor_absoluteX="48dp"
+        tools:layout_editor_absoluteY="16dp">
+
+        <LinearLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#353232"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/textView4"
+                android:textSize="29sp"
+                android:textStyle="italic|bold"
+                android:textColor="#FCFCFC"
+                android:gravity="center"
+                android:text="Report Details"/>
+
+
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/userIdLayout"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -27,8 +51,9 @@
                 android:ems="10"
                 android:text="UserID: "
                 android:textAlignment="center"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
+                android:textColor="#FCFCFC"
+                android:textSize="18sp"
+                android:textStyle="italic"/>
 
             <TextView
                 android:id="@+id/userId"
@@ -38,7 +63,7 @@
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:textAlignment="textStart"
-                android:textColor="@android:color/black"
+                android:textColor="#FCFCFC"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -57,7 +82,7 @@
                 android:ems="10"
                 android:text="Location: "
                 android:textAlignment="center"
-                android:textColor="@android:color/black"
+                android:textColor="#FCFCFC"
                 android:textSize="18sp" />
 
             <TextView
@@ -67,29 +92,24 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:textAlignment="textStart"
-                android:textColor="@android:color/black"
+                android:textColor="#FCFCFC"
                 android:textSize="18sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:text="Accident Report"
-            android:textColor="@color/cast_expanded_controller_background_color"
-            android:textSize="36sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="60dp">
 
             <ImageView
                 android:id="@+id/imageView1"
                 android:layout_width="130dp"
                 android:layout_height="130dp"
                 android:layout_weight="1"
+                android:onClick="imageViewClick"
+                android:src="@drawable/ic_add_image"
                 tools:srcCompat="@tools:sample/avatars[2]" />
 
             <ImageView
@@ -97,24 +117,29 @@
                 android:layout_width="130dp"
                 android:layout_height="130dp"
                 android:layout_weight="1"
+                android:onClick="imageViewClick"
+                android:src="@drawable/ic_add_image"
                 tools:srcCompat="@tools:sample/avatars[1]" />
 
             <ImageView
                 android:id="@+id/imageView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="130dp"
+                android:layout_height="130dp"
                 android:layout_weight="1"
+                android:onClick="imageViewClick"
+                android:src="@drawable/ic_add_image"
                 tools:srcCompat="@tools:sample/avatars[4]" />
 
         </LinearLayout>
 
         <EditText
             android:id="@+id/comment"
+            android:background="#FCFCFC"
             android:layout_width="match_parent"
-            android:layout_height="106dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="28dp"
             android:ems="10"
-            android:hint="Comment.."
+            android:hint="Comment..."
             android:inputType="textMultiLine"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -126,7 +151,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:drawable/btn_dropdown"
-            android:spinnerMode="dropdown"/>
+            android:spinnerMode="dropdown" />
 
         <LinearLayout
             android:id="@+id/buttonLayout"
@@ -139,8 +164,9 @@
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/colorCheck"
                 android:text="CANCEL"
-                android:background="@color/colorCheck"/>
+                android:textStyle="bold"/>
 
             <Button
                 android:id="@+id/button3"
@@ -148,15 +174,16 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Button"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/submitButton"
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/colorPost"
                 android:text="SUBMIT"
-                android:background="@color/colorPost"/>
+                android:textStyle="bold"/>
         </LinearLayout>
 
     </LinearLayout>
