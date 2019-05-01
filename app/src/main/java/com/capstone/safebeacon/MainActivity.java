@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,17 +47,24 @@ import java.util.Random;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageRef = storage.getReference();
+
     CollectionReference collectionReference = db.collection("reports");
+
     private static final String TAG = "TESTING";
 //    private static final int LENGTH_OF_RANDOM_STRING = 20;
 
     private static final int LENGTH_OF_REPORT_ID = 20;
     private String TIME_FORMAT_FOR_ID = "yyyyMMddHHmmZ";
-    private String TIME_FORMAT_FOR_DATE = "MM/dd/yyyy HH:mm z";
 
     private final int REQUEST_IMAGE_CAPTURE_CODE = 100;
     private ImageView imageView1;
@@ -240,7 +249,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             @Override
             public void onClick(View view) {
                 Date date = new Date();
-                setReport(parseTime(date,TIME_FORMAT_FOR_ID),userId, comment.getText().toString(),cityName,myLatLng,"photo",date,accidentType);
+
+                String reportId = parseTime(date,TIME_FORMAT_FOR_ID);
+
+//                uploadImage(reportId);
+                setReport(reportId,userId, comment.getText().toString(),cityName,myLatLng,"photo",date,accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
 
@@ -276,6 +289,31 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         }
 
     }
+
+//    public void uploadImage(String name) {
+//        StorageReference mountainsRef = storageRef.child(name);
+//        // Get the data from an ImageView as bytes
+////        imageView.setDrawingCacheEnabled(true);
+////        imageView.buildDrawingCache();
+//        Bitmap bitmap1 = ((BitmapDrawable) imageView1.getDrawable()).getBitmap();
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        bitmap1.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+//        byte[] data1 = baos.toByteArray();
+//
+//        UploadTask uploadTask = mountainsRef.putBytes(data1);
+//        uploadTask.addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception exception) {
+//                // Handle unsuccessful uploads
+//            }
+//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+//                // ...
+//            }
+//        });
+//    }
 
     public static String getFirstChar(String s) {
         return (s == null || s.length() == 0)
