@@ -252,7 +252,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
                 String reportId = parseTime(date,TIME_FORMAT_FOR_ID);
 
-//                uploadImage(reportId);
+                uploadImage(reportId+"/image1");
                 setReport(reportId,userId, comment.getText().toString(),cityName,myLatLng,"photo",date,accidentType);
 
                 Intent intent = new Intent(getApplicationContext(),MapsActivity.class);
@@ -290,30 +290,30 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
     }
 
-//    public void uploadImage(String name) {
-//        StorageReference mountainsRef = storageRef.child(name);
-//        // Get the data from an ImageView as bytes
-////        imageView.setDrawingCacheEnabled(true);
-////        imageView.buildDrawingCache();
-//        Bitmap bitmap1 = ((BitmapDrawable) imageView1.getDrawable()).getBitmap();
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        bitmap1.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-//        byte[] data1 = baos.toByteArray();
-//
-//        UploadTask uploadTask = mountainsRef.putBytes(data1);
-//        uploadTask.addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception exception) {
-//                // Handle unsuccessful uploads
-//            }
-//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//            @Override
-//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-//                // ...
-//            }
-//        });
-//    }
+    public void uploadImage(String name) {
+        StorageReference mountainsRef = storageRef.child(name);
+        // Get the data from an ImageView as bytes
+//        imageView.setDrawingCacheEnabled(true);
+//        imageView.buildDrawingCache();
+        Bitmap bitmap1 = ((BitmapDrawable) imageView1.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap1.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data1 = baos.toByteArray();
+
+        UploadTask uploadTask = mountainsRef.putBytes(data1);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                // ...
+            }
+        });
+    }
 
     public static String getFirstChar(String s) {
         return (s == null || s.length() == 0)

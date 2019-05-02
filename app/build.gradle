@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
     implementation 'com.google.firebase:firebase-firestore:18.2.0'
+    implementation 'com.google.firebase:firebase-storage:16.1.0'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
 }
 
