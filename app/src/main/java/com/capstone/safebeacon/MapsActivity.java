@@ -177,11 +177,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void addMarkers() {
         mMap.clear();
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this,reports));
         for (int i = 0; i < reports.size(); i++) {
             Report report = reports.get(i);
             String snippet = report.getStringDate() + "\n" +
                     "@ " + geoLocateByLatLng(report.getLatLng()).getAddressLine(0);
+            String name = report.getReportID();
 
             mMap.addMarker(new MarkerOptions().position(report.getLatLng())
                     .title(typeToIncident.get(report.getIncidentType()).getName())
@@ -440,22 +441,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
     }
 
-    public void downloadImage(String name, final ImageView imageView) {
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://filestorage-d5afb.appspot.com").child(name);
-        
-
-        final long ONE_MEGABYTE = 1024 * 1024;
-
-        //download file as a byte array
-        storageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                imageView.setImageBitmap(bitmap);
-            }
-        });
-    }
 
     public Address geoLocateByLatLng(LatLng latLng) {
         Geocoder geocoder = new Geocoder(MapsActivity.this);

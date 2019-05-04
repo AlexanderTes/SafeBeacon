@@ -1,21 +1,31 @@
 package com.capstone.safebeacon;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.ArrayList;
 
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final View mWindow;
     private Context mContext;
+    ArrayList<Report> reports;
 
-    public CustomInfoWindowAdapter(Context mContext) {
+    public CustomInfoWindowAdapter(Context mContext, ArrayList<Report> reports) {
         this.mContext = mContext;
         mWindow = LayoutInflater.from(mContext).inflate(R.layout.info_window,null);
+        this.reports = reports;
     }
 
     private void renderWindowText(Marker marker, View view){
@@ -33,6 +43,30 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         if(!snippet.equals("")){
             tvSnippet.setText(snippet);
         }
+
+        downloadImage("201905011615-0500/image1",view);
+    }
+
+
+
+    public Bitmap downloadImage(String name,View view) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://safebeacon-2019.appspot.com").child(name);
+
+        final Bitmap[] bitmap = {null};
+        final ImageView imageView = view.findViewById(R.id.markerImageView);
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+
+        //download file as a byte array
+        storageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                imageView.setImageBitmap(bitmap);
+            }
+        });
+        return bitmap[0];
     }
 
     @Override
