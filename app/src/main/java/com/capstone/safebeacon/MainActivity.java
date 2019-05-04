@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -314,6 +315,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             }
         });
     }
+
+
 
     public static String getFirstChar(String s) {
         return (s == null || s.length() == 0)
