@@ -1,4 +1,5 @@
 # SafeBeacon
+![Safe Beacon image](https://github.com/AlexanderTes/SafeBeacon/blob/HaoNguyen/Safe%20Beacon.png)
 
 ### This is an android application built with Android Studio and Raspberry Pi.
 ### It aims to help minimize the car accidents
