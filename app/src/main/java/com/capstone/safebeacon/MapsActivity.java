@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -27,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -43,6 +46,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
@@ -51,6 +55,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
@@ -171,11 +177,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void addMarkers() {
         mMap.clear();
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this,reports));
         for (int i = 0; i < reports.size(); i++) {
             Report report = reports.get(i);
             String snippet = report.getStringDate() + "\n" +
                     "@ " + geoLocateByLatLng(report.getLatLng()).getAddressLine(0);
+            String name = report.getReportID();
 
             mMap.addMarker(new MarkerOptions().position(report.getLatLng())
                     .title(typeToIncident.get(report.getIncidentType()).getName())
@@ -402,7 +409,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                                                 .build();
 
-                                        if(distance <= RADIUS && !userId.equals(dc.getDocument().get("userId")))
+                                        if(!userId.equals(dc.getDocument().get("userId")))
                                             notificationManager.notify(1,notification);
                                         break;
                                 }
@@ -433,6 +440,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
     }
+
 
     public Address geoLocateByLatLng(LatLng latLng) {
         Geocoder geocoder = new Geocoder(MapsActivity.this);
