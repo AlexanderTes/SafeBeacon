@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -44,7 +45,19 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             tvSnippet.setText(snippet);
         }
 
-        downloadImage("201905011615-0500/image1",view);
+        // Get image
+        Incidents.Incident incident = new Incidents.Incident(title);
+        Double lat = marker.getPosition().latitude;
+        Double lng = marker.getPosition().longitude;
+        String downloadImageString="";
+        for (int i = 0; i < reports.size(); i++){
+            if (reports.get(i).getIncidentType() == incident.getType())
+                if (reports.get(i).getLatLng().latitude == lat)
+                    if(reports.get(i).getLatLng().longitude == lng)
+                        downloadImageString = reports.get(i).getReportID();
+        }
+        if(!downloadImageString.equals(""))
+            downloadImage(downloadImageString.concat("/image1"),view);
     }
 
 

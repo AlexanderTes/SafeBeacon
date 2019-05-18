@@ -53,6 +53,30 @@ public class Incidents {
             }
         }
 
+        Incident(String name){
+            IncidentType incType = new IncidentType();
+            this.name = name;
+            if (name.equals("Fighting")) {
+                this.type = incType.FIGHTING;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.fighting);
+            } else if (name.equals("Burglar")) {
+                this.type = incType.BURGLAR;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.burglar);
+            } else if (name.equals("Theft")) {
+                this.type = incType.THEFT;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.theft);
+            } else if (name.equals("Minor Accident")) {
+                this.type = incType.MINOR_ACCIDENT;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.minor_accident);
+            } else if (name.equals("Severe Accident")) {
+                this.type = incType.SEVERE_ACCIDENT;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.severe_accident);
+            } else {
+                this.type = incType.CRIME;
+                this.icon = BitmapDescriptorFactory.fromResource(R.drawable.crime);
+            }
+        }
+
         public int getType() {
             return type;
         }
